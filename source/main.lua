@@ -7,6 +7,9 @@ import "vector3d"
 import "progress"
 import "shaking"
 import "die"
+import "lock"
+
+local INITIAL_DICE_COUNT <const> = 3
 
 local background_pattern = playdate.graphics.image.new("images/patterns/forwardslash")
   or error("Failed to load images/patterns/forwardslash.png")
@@ -77,41 +80,44 @@ local function remove_random_die()
   end
 end
 
-add_die(die())
-add_die(die())
-add_die(die())
+for _ = 1, INITIAL_DICE_COUNT do
+  add_die(die())
+end
 
 local fade = progress(10)
 
 function playdate.update()
   shaking:update()
   fade:update()
+  lock:update()
 
-  if shaking.is_shaking and shaking.is_extremum then
-    for i = 1, #dice do
-      dice[i]:play_shake_effect()
+  if lock.is_unlocked then
+    if shaking.is_shaking and shaking.is_extremum then
+      for i = 1, #dice do
+        dice[i]:play_shake_effect()
+      end
+    end
+
+    if shaking.is_stop_shaking then
+      shuffle_dice()
+
+      for i = 1, #dice do
+        dice[i]:play_roll_effect()
+      end
+    end
+
+    if playdate.buttonJustPressed(playdate.kButtonRight) or playdate.buttonJustPressed(playdate.kButtonUp) then
+      if (#dice < 6) then
+        add_die(die())
+      end
+    end
+
+    if playdate.buttonJustPressed(playdate.kButtonLeft) or playdate.buttonJustPressed(playdate.kButtonDown) then
+      remove_random_die()
     end
   end
 
-  if shaking.is_stop_shaking then
-    shuffle_dice()
-
-    for i = 1, #dice do
-      dice[i]:play_roll_effect()
-    end
-  end
-
-  if playdate.buttonJustPressed(playdate.kButtonRight) or playdate.buttonJustPressed(playdate.kButtonUp) then
-    if (#dice < 6) then
-      add_die(die())
-    end
-  end
-
-  if playdate.buttonJustPressed(playdate.kButtonLeft) or playdate.buttonJustPressed(playdate.kButtonDown) then
-    remove_random_die()
-  end
-
-  if shaking.is_shaking then
+  if lock.is_unlocked and shaking.is_shaking then
     fade:forward()
   else
     fade:backward()
@@ -129,6 +135,8 @@ function playdate.update()
   for i = 1, #dice do
     dice[i]:draw()
   end
+
+  lock:draw()
 
   playdate.graphics.fillCircleAtPoint(
     playdate.display.getWidth() / 2,
