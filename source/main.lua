@@ -1,6 +1,7 @@
 import "CoreLibs/graphics"
 import "CoreLibs/object"
 import "CoreLibs/animator"
+
 import "../deps/classic"
 
 import "vector3d"
@@ -12,24 +13,26 @@ import "lock"
 import "fade"
 
 local INITIAL_DICE_COUNT <const> = 3
+local MAX_DICE_COUNT <const> = 6
 
 playdate.display.setRefreshRate(50.0)
 
 ---@type die[]
 local dice = {}
 
----@param die die
----@return boolean
-local function try_add_die(die)
+---@param other pd_point[]
+---@return pd_point?
+function find_free_place_for_die(other)
+  local position = playdate.geometry.point.new(0, 0)
   local attempts = 0
   repeat
     local overlaps = false
 
-    die.position.x = math.random(DIE_SIZE, playdate.display.getWidth() - DIE_SIZE)
-    die.position.y = math.random(DIE_SIZE, playdate.display.getHeight() - DIE_SIZE)
+    position.x = math.random(DIE_SIZE, math.floor(playdate.display.getWidth() - DIE_SIZE * 1.5))
+    position.y = math.random(DIE_SIZE, math.floor(playdate.display.getHeight() - DIE_SIZE * 1.5))
 
-    for i = 1, #dice do
-      if die.position:distanceToPoint(dice[i].position) < DIE_SIZE * 1.42 then
+    for i = 1, #other do
+      if other[i]:distanceToPoint(position) < DIE_SIZE * 1.41 then
         overlaps = true
         break
       end
@@ -38,48 +41,55 @@ local function try_add_die(die)
     attempts += 1
 
     if attempts > 20 then
-      return false
+      return nil
     end
 
   until not overlaps
 
-  die.show_animation:reset()
-  table.insert(dice, die)
-  return true
+  return position
 end
 
-local function roll_dice()
-  local prev_dice = dice
+---@param new_dice die[]
+local function add_dice(new_dice)
+  ---@type pd_point[]
+  local positions = {}
+  for i = 1, #dice do
+    table.insert(positions, dice[i].position)
+  end
 
-  ::restart::
-  dice = {}
-
-  for i = 1, #prev_dice do
-    if not try_add_die(prev_dice[i]) then
-      goto restart
+  while #positions < #dice + #new_dice do
+    local position = find_free_place_for_die(positions)
+    if position then
+      table.insert(positions, position)
+    else
+      positions = {}
     end
+  end
 
-    prev_dice[i]:roll()
+  for i = 1, #new_dice do
+    table.insert(dice, new_dice[i])
+  end
+
+  for i = 1, #positions do
+    if dice[i].position ~= positions[i] then
+      dice[i].position = positions[i]
+      dice[i]:roll()
+    end
   end
 end
 
----@param die die
-local function add_die(die)
-  while not try_add_die(die) do
-    roll_dice()
-  end
-
-  die:play_roll_effect()
+local function reroll_dice()
+  local prev_dice = dice
+  dice = {}
+  add_dice(prev_dice)
 end
 
 local function remove_random_die()
-  if #dice > 1 then
-    table.remove(dice, math.random(#dice))
-  end
+  table.remove(dice, math.random(#dice))
 end
 
 for _ = 1, INITIAL_DICE_COUNT do
-  add_die(die())
+  add_dice({die()})
 end
 
 function playdate.update()
@@ -99,7 +109,7 @@ function playdate.update()
     end
 
     if shaking.is_stop_shaking then
-      roll_dice()
+      reroll_dice()
 
       for i = 1, #dice do
         dice[i]:play_roll_effect()
@@ -107,13 +117,15 @@ function playdate.update()
     end
 
     if playdate.buttonJustPressed(playdate.kButtonRight) or playdate.buttonJustPressed(playdate.kButtonUp) then
-      if (#dice < 6) then
-        add_die(die())
+      if #dice < MAX_DICE_COUNT then
+        add_dice({die()})
       end
     end
 
     if playdate.buttonJustPressed(playdate.kButtonLeft) or playdate.buttonJustPressed(playdate.kButtonDown) then
-      remove_random_die()
+      if #dice > 1 then
+        remove_random_die()
+      end
     end
   end
 

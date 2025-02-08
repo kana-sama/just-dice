@@ -1,5 +1,4 @@
 DIE_SIZE = 50
-DIE_POINT_RADIUS = 4
 
 local roll_effect = playdate.sound.sample.new("audio/roll")
   or error("Failed to load audio/roll.wav")
@@ -31,6 +30,8 @@ end
 
 function die:roll()
   self.value = math.random(6)
+  self.show_animation:reset()
+  self:play_roll_effect()
 end
 
 function die:play_roll_effect()
@@ -58,34 +59,34 @@ function die:render()
   playdate.graphics.fillRoundRect(0, 0, DIE_SIZE, DIE_SIZE, 15)
 
   playdate.graphics.setColor(theme:background_color())
-  playdate.graphics.setLineWidth(DIE_POINT_RADIUS)
+  local radius = DIE_SIZE * 0.1
   if self.value == 1 then
-    playdate.graphics.fillCircleAtPoint(DIE_SIZE / 2, DIE_SIZE / 2, DIE_POINT_RADIUS)
+    playdate.graphics.fillCircleAtPoint(DIE_SIZE / 2, DIE_SIZE / 2, radius)
   elseif self.value == 2 then
-    playdate.graphics.fillCircleAtPoint(DIE_SIZE / 4, DIE_SIZE / 4, DIE_POINT_RADIUS)
-    playdate.graphics.fillCircleAtPoint(DIE_SIZE / 4 * 3, DIE_SIZE / 4 * 3, DIE_POINT_RADIUS)
+    playdate.graphics.fillCircleAtPoint(DIE_SIZE / 4, DIE_SIZE / 4, radius)
+    playdate.graphics.fillCircleAtPoint(DIE_SIZE / 4 * 3, DIE_SIZE / 4 * 3, radius)
   elseif self.value == 3 then
-    playdate.graphics.fillCircleAtPoint(DIE_SIZE / 4, DIE_SIZE / 4, DIE_POINT_RADIUS)
-    playdate.graphics.fillCircleAtPoint(DIE_SIZE / 2, DIE_SIZE / 2, DIE_POINT_RADIUS)
-    playdate.graphics.fillCircleAtPoint(DIE_SIZE / 4 * 3, DIE_SIZE / 4 * 3, DIE_POINT_RADIUS)
+    playdate.graphics.fillCircleAtPoint(DIE_SIZE / 4, DIE_SIZE / 4, radius)
+    playdate.graphics.fillCircleAtPoint(DIE_SIZE / 2, DIE_SIZE / 2, radius)
+    playdate.graphics.fillCircleAtPoint(DIE_SIZE / 4 * 3, DIE_SIZE / 4 * 3, radius)
   elseif self.value == 4 then
-    playdate.graphics.fillCircleAtPoint(DIE_SIZE / 4, DIE_SIZE / 4, DIE_POINT_RADIUS)
-    playdate.graphics.fillCircleAtPoint(DIE_SIZE / 4 * 3, DIE_SIZE / 4, DIE_POINT_RADIUS)
-    playdate.graphics.fillCircleAtPoint(DIE_SIZE / 4, DIE_SIZE / 4 * 3, DIE_POINT_RADIUS)
-    playdate.graphics.fillCircleAtPoint(DIE_SIZE / 4 * 3, DIE_SIZE / 4 * 3, DIE_POINT_RADIUS)
+    playdate.graphics.fillCircleAtPoint(DIE_SIZE / 4, DIE_SIZE / 4, radius)
+    playdate.graphics.fillCircleAtPoint(DIE_SIZE / 4 * 3, DIE_SIZE / 4, radius)
+    playdate.graphics.fillCircleAtPoint(DIE_SIZE / 4, DIE_SIZE / 4 * 3, radius)
+    playdate.graphics.fillCircleAtPoint(DIE_SIZE / 4 * 3, DIE_SIZE / 4 * 3, radius)
   elseif self.value == 5 then
-    playdate.graphics.fillCircleAtPoint(DIE_SIZE / 4, DIE_SIZE / 4, DIE_POINT_RADIUS)
-    playdate.graphics.fillCircleAtPoint(DIE_SIZE / 4 * 3, DIE_SIZE / 4, DIE_POINT_RADIUS)
-    playdate.graphics.fillCircleAtPoint(DIE_SIZE / 4, DIE_SIZE / 4 * 3, DIE_POINT_RADIUS)
-    playdate.graphics.fillCircleAtPoint(DIE_SIZE / 4 * 3, DIE_SIZE / 4 * 3, DIE_POINT_RADIUS)
-    playdate.graphics.fillCircleAtPoint(DIE_SIZE / 2, DIE_SIZE / 2, DIE_POINT_RADIUS)
+    playdate.graphics.fillCircleAtPoint(DIE_SIZE / 4, DIE_SIZE / 4, radius)
+    playdate.graphics.fillCircleAtPoint(DIE_SIZE / 4 * 3, DIE_SIZE / 4, radius)
+    playdate.graphics.fillCircleAtPoint(DIE_SIZE / 4, DIE_SIZE / 4 * 3, radius)
+    playdate.graphics.fillCircleAtPoint(DIE_SIZE / 4 * 3, DIE_SIZE / 4 * 3, radius)
+    playdate.graphics.fillCircleAtPoint(DIE_SIZE / 2, DIE_SIZE / 2, radius)
   elseif self.value == 6 then
-    playdate.graphics.fillCircleAtPoint(DIE_SIZE / 4, DIE_SIZE / 4, DIE_POINT_RADIUS)
-    playdate.graphics.fillCircleAtPoint(DIE_SIZE / 4 * 3, DIE_SIZE / 4, DIE_POINT_RADIUS)
-    playdate.graphics.fillCircleAtPoint(DIE_SIZE / 4, DIE_SIZE / 4 * 3, DIE_POINT_RADIUS)
-    playdate.graphics.fillCircleAtPoint(DIE_SIZE / 4 * 3, DIE_SIZE / 4 * 3, DIE_POINT_RADIUS)
-    playdate.graphics.fillCircleAtPoint(DIE_SIZE / 4, DIE_SIZE / 2, DIE_POINT_RADIUS)
-    playdate.graphics.fillCircleAtPoint(DIE_SIZE / 4 * 3, DIE_SIZE / 2, DIE_POINT_RADIUS)
+    playdate.graphics.fillCircleAtPoint(DIE_SIZE / 4, DIE_SIZE / 4, radius)
+    playdate.graphics.fillCircleAtPoint(DIE_SIZE / 4 * 3, DIE_SIZE / 4, radius)
+    playdate.graphics.fillCircleAtPoint(DIE_SIZE / 4, DIE_SIZE / 4 * 3, radius)
+    playdate.graphics.fillCircleAtPoint(DIE_SIZE / 4 * 3, DIE_SIZE / 4 * 3, radius)
+    playdate.graphics.fillCircleAtPoint(DIE_SIZE / 4, DIE_SIZE / 2, radius)
+    playdate.graphics.fillCircleAtPoint(DIE_SIZE / 4 * 3, DIE_SIZE / 2, radius)
   end
 
   playdate.graphics.popContext()
