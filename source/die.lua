@@ -8,12 +8,15 @@ local roll_effect = playdate.sound.sample.new("audio/roll")
 local shake_effect = playdate.sound.sample.new("audio/shake")
   or error("Failed to load audio/shake.wav")
 
+---@alias die_value 1 | 2 | 3 | 4 | 5 | 6
+
 ---@class die
----@field value 1 | 2 | 3 | 4 | 5 | 6
+---@field value die_value
 ---@field position pd_point
 ---@field angle number
 ---@field image pd_image
 ---@field show_animation pd_animator
+---@field drawn_cache? { theme_version: number, value: die_value, angle: number }
 ---@overload fun(): die
 die = Object:extend()
 
@@ -23,6 +26,8 @@ function die:new()
   self.angle = math.random(360)
   self.image = playdate.graphics.image.new(DIE_SIZE, DIE_SIZE)
   self.show_animation = playdate.graphics.animator.new(500, 0, 1, playdate.easingFunctions.outCirc)
+  self.drawn_with_version = theme.version
+  self.drawn_cache = nil
 end
 
 function die:roll()
@@ -50,15 +55,16 @@ function die:play_shake_effect()
   shake_effect:playAt(offset, volume, nil, rate)
 end
 
-function die:predraw()
+function die:render()
   local image = playdate.graphics.image.new(DIE_SIZE, DIE_SIZE)
 
   playdate.graphics.pushContext(image)
 
+  playdate.graphics.setColor(theme:foreground_color())
   playdate.graphics.fillRoundRect(0, 0, DIE_SIZE, DIE_SIZE, 15)
 
+  playdate.graphics.setColor(theme:background_color())
   playdate.graphics.setLineWidth(DIE_POINT_RADIUS)
-  playdate.graphics.setColor(playdate.graphics.kColorWhite)
   if self.value == 1 then
     playdate.graphics.fillCircleAtPoint(DIE_SIZE / 2, DIE_SIZE / 2, DIE_POINT_RADIUS)
   elseif self.value == 2 then
@@ -91,9 +97,25 @@ function die:predraw()
   playdate.graphics.popContext()
 
   self.image = image:rotatedImage(self.angle)
+  self.drawn_cache = {
+    theme_version = theme.version,
+    angle = self.angle,
+    value = self.value,
+  }
+end
+
+function die:is_cache_invalidated()
+  return not self.drawn_cache
+    or self.drawn_cache.theme_version ~= theme.version
+    or self.drawn_cache.value ~= self.value
+    or self.drawn_cache.angle ~= self.angle
 end
 
 function die:draw()
+  if self:is_cache_invalidated() then
+    self:render()
+  end
+
   self.image:draw(
     self.position.x * self.show_animation:currentValue(),
     self.position.y * self.show_animation:currentValue()

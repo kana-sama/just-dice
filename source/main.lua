@@ -4,15 +4,14 @@ import "CoreLibs/animator"
 import "../deps/classic"
 
 import "vector3d"
+import "theme"
 import "progress"
 import "shaking"
 import "die"
 import "lock"
+import "fade"
 
 local INITIAL_DICE_COUNT <const> = 3
-
-local background_pattern = playdate.graphics.image.new("images/patterns/forwardslash")
-  or error("Failed to load images/patterns/forwardslash.png")
 
 playdate.display.setRefreshRate(50.0)
 
@@ -44,13 +43,12 @@ local function try_add_die(die)
 
   until not overlaps
 
-  die:predraw()
   die.show_animation:reset()
   table.insert(dice, die)
   return true
 end
 
-local function shuffle_dice()
+local function roll_dice()
   local prev_dice = dice
 
   ::restart::
@@ -68,7 +66,7 @@ end
 ---@param die die
 local function add_die(die)
   while not try_add_die(die) do
-    shuffle_dice()
+    roll_dice()
   end
 
   die:play_roll_effect()
@@ -84,12 +82,14 @@ for _ = 1, INITIAL_DICE_COUNT do
   add_die(die())
 end
 
-local fade = progress(10)
-
 function playdate.update()
   shaking:update()
   fade:update()
   lock:update()
+
+  if playdate.buttonJustPressed(playdate.kButtonA) then
+    theme:toggle()
+  end
 
   if lock.is_unlocked then
     if shaking.is_shaking and shaking.is_extremum then
@@ -99,7 +99,7 @@ function playdate.update()
     end
 
     if shaking.is_stop_shaking then
-      shuffle_dice()
+      roll_dice()
 
       for i = 1, #dice do
         dice[i]:play_roll_effect()
@@ -124,24 +124,14 @@ function playdate.update()
   end
 
   playdate.graphics.setBackgroundColor(playdate.graphics.kColorBlack)
-  playdate.graphics.setColor(playdate.graphics.kColorBlack)
   playdate.graphics.clear()
-
-  playdate.graphics.pushContext()
-  playdate.graphics.setPattern(background_pattern)
+  playdate.graphics.setPattern(theme:background_pattern())
   playdate.graphics.fillRoundRect(0, 0, playdate.display.getWidth(), playdate.display.getHeight(), 15)
-  playdate.graphics.popContext()
 
   for i = 1, #dice do
     dice[i]:draw()
   end
 
   lock:draw()
-
-  playdate.graphics.fillCircleAtPoint(
-    playdate.display.getWidth() / 2,
-    playdate.display.getHeight() / 2,
-    fade:progress() * 400,
-    playdate.graphics.kColorBlack
-  )
+  fade:draw()
 end

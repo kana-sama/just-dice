@@ -60,6 +60,7 @@ end
 
 function Object:__call(...)
   local obj = setmetatable({}, self)
+---@diagnostic disable-next-line: redundant-parameter
   obj:new(...)
   return obj
 end

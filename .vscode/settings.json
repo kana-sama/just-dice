@@ -3,7 +3,7 @@
     "$PLAYDATE_SDK_PATH/CoreLibs"
   ],
   "Lua.diagnostics.globals": [
-    "playdate"
+    "playdate",
   ],
   "Lua.runtime.special": {
     "import": "require"
@@ -17,4 +17,7 @@
   "Lua.hint.setType": true,
   "Lua.hint.awaitPropagate": true,
   "Lua.hint.enable": true,
+  "Lua.diagnostics.disable": [
+    "lowercase-global"
+  ],
 }
