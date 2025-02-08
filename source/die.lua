@@ -21,7 +21,7 @@ die = Object:extend()
 die.size = INITIAL_DIE_SIZE
 
 function die:new()
-  self.value = math.random(6)
+  self.value = nil
   self.position = playdate.geometry.point.new(0, 0)
   self.angle = math.random(360)
   self.image = playdate.graphics.image.new(die.size, die.size)
@@ -34,6 +34,7 @@ function die:roll()
   self.value = math.random(6)
   self.show_animation:reset()
   self:play_roll_effect()
+  stat:add_die(self.value)
 end
 
 function die:play_roll_effect()

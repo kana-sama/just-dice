@@ -53,3 +53,11 @@ end
 function theme:background_pattern()
   return self.values.bg_pattern
 end
+
+function theme:text_draw_mode()
+  if self.values.fg == playdate.graphics.kColorBlack then
+    return playdate.graphics.kDrawModeFillBlack
+  else
+    return playdate.graphics.kDrawModeFillWhite
+  end
+end

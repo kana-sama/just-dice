@@ -11,6 +11,7 @@ import "shaking"
 import "die"
 import "lock"
 import "fade"
+import "stat"
 
 local INITIAL_DICE_COUNT <const> = 3
 local MAX_DICE_COUNT <const> = 6
@@ -20,6 +21,10 @@ playdate.display.setRefreshRate(50.0)
 playdate.getSystemMenu():addOptionsMenuItem("Theme", {"dark", "light"}, "dark", function(new_theme)
   theme:set(new_theme)
 end)
+
+function playdate.gameWillPause()
+  playdate.setMenuImage(stat:render())
+end
 
 ---@type die[]
 local dice = {}
