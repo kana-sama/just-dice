@@ -28,11 +28,11 @@ function find_free_place_for_die(other)
   repeat
     local overlaps = false
 
-    position.x = math.random(DIE_SIZE, math.floor(playdate.display.getWidth() - DIE_SIZE * 1.5))
-    position.y = math.random(DIE_SIZE, math.floor(playdate.display.getHeight() - DIE_SIZE * 1.5))
+    position.x = math.random(die.size, math.floor(playdate.display.getWidth() - die.size * 1.5))
+    position.y = math.random(die.size, math.floor(playdate.display.getHeight() - die.size * 1.5))
 
     for i = 1, #other do
-      if other[i]:distanceToPoint(position) < DIE_SIZE * 1.41 then
+      if other[i]:distanceToPoint(position) < die.size * 1.41 then
         overlaps = true
         break
       end
@@ -88,6 +88,18 @@ local function remove_random_die()
   table.remove(dice, math.random(#dice))
 end
 
+---@param size number
+local function set_dice_size(size)
+  if size <= 2 then
+    die.size = 70
+  elseif size <= 4 then
+    die.size = 60
+  else
+    die.size = 50
+  end
+end
+
+set_dice_size(INITIAL_DICE_COUNT)
 for _ = 1, INITIAL_DICE_COUNT do
   add_dice({die()})
 end
@@ -118,13 +130,16 @@ function playdate.update()
 
     if playdate.buttonJustPressed(playdate.kButtonRight) or playdate.buttonJustPressed(playdate.kButtonUp) then
       if #dice < MAX_DICE_COUNT then
+        set_dice_size(#dice + 1)
         add_dice({die()})
       end
     end
 
     if playdate.buttonJustPressed(playdate.kButtonLeft) or playdate.buttonJustPressed(playdate.kButtonDown) then
       if #dice > 1 then
+        set_dice_size(#dice - 1)
         remove_random_die()
+        reroll_dice()
       end
     end
   end
