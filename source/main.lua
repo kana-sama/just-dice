@@ -25,11 +25,11 @@ local function try_add_die(die)
   repeat
     local overlaps = false
 
-    die.position.x = math.random(DIE_SIZE, playdate.display.getWidth() - DIE_SIZE * 1.5)
-    die.position.y = math.random(DIE_SIZE, playdate.display.getHeight() - DIE_SIZE * 1.5)
+    die.position.x = math.random(DIE_SIZE, playdate.display.getWidth() - DIE_SIZE)
+    die.position.y = math.random(DIE_SIZE, playdate.display.getHeight() - DIE_SIZE)
 
     for i = 1, #dice do
-      if die:center():distanceToPoint(dice[i]:center()) < MIN_DICE_DISTANCE then
+      if die.position:distanceToPoint(dice[i].position) < DIE_SIZE * 1.42 then
         overlaps = true
         break
       end

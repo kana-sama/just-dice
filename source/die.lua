@@ -1,6 +1,5 @@
 DIE_SIZE = 50
 DIE_POINT_RADIUS = 4
-MIN_DICE_DISTANCE = DIE_SIZE * 1.42
 
 local roll_effect = playdate.sound.sample.new("audio/roll")
   or error("Failed to load audio/roll.wav")
@@ -32,11 +31,6 @@ end
 
 function die:roll()
   self.value = math.random(6)
-end
-
----@return pd_point
-function die:center()
-  return self.position + playdate.geometry.vector2D.new(DIE_SIZE / 2, DIE_SIZE / 2)
 end
 
 function die:play_roll_effect()
@@ -116,7 +110,7 @@ function die:draw()
     self:render()
   end
 
-  self.image:draw(
+  self.image:drawCentered(
     self.position.x * self.show_animation:currentValue(),
     self.position.y * self.show_animation:currentValue()
   )
