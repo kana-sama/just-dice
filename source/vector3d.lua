@@ -23,6 +23,16 @@ function vector3D.__add(a, b)
   return vector3D(a.x + b.x, a.y + b.y, a.z + b.z)
 end
 
+function vector3D.__sub(a, b)
+  return vector3D(a.x - b.x, a.y - b.y, a.z - b.z)
+end
+
 function vector3D.__div(a, b)
   return vector3D(a.x / b, a.y / b, a.z / b)
+end
+
+---@param other vector3D
+---@return boolean
+function vector3D:in_same_direction_with(other)
+  return #(self + other) > #self
 end

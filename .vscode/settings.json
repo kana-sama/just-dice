@@ -14,4 +14,7 @@
     "*=",
     "/="
   ],
+  "Lua.hint.setType": true,
+  "Lua.hint.awaitPropagate": true,
+  "Lua.hint.enable": true,
 }

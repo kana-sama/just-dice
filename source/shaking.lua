@@ -1,53 +1,78 @@
+local MAX_HISTORY_SIZE <const> = 10
+local REQUIRED_SHAKE_FORCE <const> = 0.3
+local SHAKE_DEBOUNCE <const> = 7
+local EXTREMUM_DEBOUNCE <const> = 5
+
 ---@class shaking
----@field last_accels vector3D[]
 shaking = {
-  last_accels = {};
+  ---@type vector3D[]
+  history = {};
+
   is_shaking = false;
   is_start_shaking = false;
   is_stop_shaking = false;
   is_extremum = false;
-  debounce = 0;
+
+  shake_debounce = 0;
+  extremum_debounce = 0;
 }
+
+---@return vector3D
+function shaking:last()
+  return self.history[#self.history]
+end
+
+---@return vector3D
+function shaking:prev()
+  return self.history[#self.history - 1]
+end
 
 function shaking:update()
   playdate.startAccelerometer()
 
   local x, y, z = playdate.readAccelerometer()
-  table.insert(self.last_accels, vector3D(x, y, z))
-  if #self.last_accels > 10 then
-    table.remove(self.last_accels, 1)
+  table.insert(self.history, vector3D(x, y, z))
+  if #self.history > MAX_HISTORY_SIZE then
+    table.remove(self.history, 1)
   end
 
   local average = vector3D.zero()
-  for i = 1, #self.last_accels do
-    average += self.last_accels[i]
+  for i = 1, #self.history do
+    average += self.history[i]
   end
-  local average = #(average / #self.last_accels)
+  local average = #(average / #self.history)
 
   local total_delta_len = 0
-  for i = 1, #self.last_accels do
-    total_delta_len += #self.last_accels[i] - average
+  for i = 1, #self.history do
+    total_delta_len += #self.history[i] - average
   end
-  total_delta_len /= #self.last_accels
+  total_delta_len /= #self.history
 
-  local is_shaking_right_now = total_delta_len > 0.5
+  local is_shaking_right_now = total_delta_len > REQUIRED_SHAKE_FORCE
 
   if is_shaking_right_now ~= self.is_shaking then
-    self.debounce += 1
+    self.shake_debounce += 1
   else
-    self.debounce = 0
+    self.shake_debounce = 0
   end
 
   local is_shaking_prev = self.is_shaking
 
-  if self.debounce > 10 then
+  if self.shake_debounce > SHAKE_DEBOUNCE then
     self.is_shaking = is_shaking_right_now
-    self.debounce = 0
+    self.shake_debounce = 0
   end
 
-  self.is_start_shaking = not is_shaking_prev and self.is_shaking;
-  self.is_stop_shaking = is_shaking_prev and not self.is_shaking;
-  self.is_extremum = #self.last_accels > 2
-    and #self.last_accels[#self.last_accels] < #self.last_accels[#self.last_accels-1]
-    and #self.last_accels[#self.last_accels-1] > #self.last_accels[#self.last_accels-2]
+  self.is_start_shaking = not is_shaking_prev and self.is_shaking
+  self.is_stop_shaking = is_shaking_prev and not self.is_shaking
+
+  self.is_extremum = self.extremum_debounce <= 0
+    and #self.history > 1
+    and #(self:last() - self:prev()) > 0.5
+
+  if self.is_extremum then
+    self.extremum_debounce = EXTREMUM_DEBOUNCE
+  else
+    self.extremum_debounce -= 1
+  end
 end

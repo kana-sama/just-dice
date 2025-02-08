@@ -35,7 +35,7 @@ local function try_add_die(die)
 
     attempts += 1
 
-    if attempts > 100 then
+    if attempts > 20 then
       return false
     end
 
@@ -62,6 +62,7 @@ local function shuffle_dice()
   end
 end
 
+---@param die die
 local function add_die(die)
   while not try_add_die(die) do
     shuffle_dice()

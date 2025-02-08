@@ -2,18 +2,16 @@ DIE_SIZE = 50
 DIE_POINT_RADIUS = 4
 MIN_DICE_DISTANCE = DIE_SIZE * 1.42
 
-local roll_effect = playdate.sound.sampleplayer.new("audio/roll")
+local roll_effect = playdate.sound.sample.new("audio/roll")
   or error("Failed to load audio/roll.wav")
 
-local shake_effect = playdate.sound.sampleplayer.new("audio/shake")
+local shake_effect = playdate.sound.sample.new("audio/shake")
   or error("Failed to load audio/shake.wav")
 
 ---@class die
 ---@field value 1 | 2 | 3 | 4 | 5 | 6
 ---@field position pd_point
 ---@field angle number
----@field roll_effect pd_sampleplayer
----@field shake_effects_pool pd_sampleplayer[]
 ---@field image pd_image
 ---@field show_animation pd_animator
 ---@overload fun(): die
@@ -23,8 +21,6 @@ function die:new()
   self.value = math.random(6)
   self.position = playdate.geometry.point.new(0, 0)
   self.angle = math.random(360)
-  self.roll_effect = roll_effect:copy()
-  self.shake_effects_pool = {shake_effect:copy(), shake_effect:copy(), shake_effect:copy()}
   self.image = playdate.graphics.image.new(DIE_SIZE, DIE_SIZE)
   self.show_animation = playdate.graphics.animator.new(500, 0, 1, playdate.easingFunctions.outCirc)
 end
@@ -43,7 +39,7 @@ function die:play_roll_effect()
   local volume = 0.6 + math.random() * 0.4
   local rate   = 0.8 + math.random() * 0.4
 
-  self.roll_effect:playAt(offset, volume, nil, rate)
+  roll_effect:playAt(offset, volume, nil, rate)
 end
 
 function die:play_shake_effect()
@@ -51,18 +47,13 @@ function die:play_shake_effect()
   local volume = 0.6 + math.random() * 0.4
   local rate   = 0.8 + math.random() * 0.4
 
-  for i = 1, #self.shake_effects_pool do
-    if not self.shake_effects_pool[i]:isPlaying() then
-      self.shake_effects_pool[i]:playAt(offset, volume, nil, rate)
-      return
-    end
-  end
+  shake_effect:playAt(offset, volume, nil, rate)
 end
 
 function die:predraw()
-  self.image = playdate.graphics.image.new(DIE_SIZE, DIE_SIZE)
+  local image = playdate.graphics.image.new(DIE_SIZE, DIE_SIZE)
 
-  playdate.graphics.pushContext(self.image)
+  playdate.graphics.pushContext(image)
 
   playdate.graphics.fillRoundRect(0, 0, DIE_SIZE, DIE_SIZE, 15)
 
@@ -99,7 +90,7 @@ function die:predraw()
 
   playdate.graphics.popContext()
 
-  self.image = self.image:rotatedImage(self.angle)
+  self.image = image:rotatedImage(self.angle)
 end
 
 function die:draw()
