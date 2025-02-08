@@ -17,6 +17,10 @@ local MAX_DICE_COUNT <const> = 6
 
 playdate.display.setRefreshRate(50.0)
 
+playdate.getSystemMenu():addOptionsMenuItem("Theme", {"dark", "light"}, "dark", function(new_theme)
+  theme:set(new_theme)
+end)
+
 ---@type die[]
 local dice = {}
 
@@ -108,10 +112,6 @@ function playdate.update()
   shaking:update()
   fade:update()
   lock:update()
-
-  if playdate.buttonJustPressed(playdate.kButtonA) then
-    theme:toggle()
-  end
 
   if lock.is_unlocked then
     if shaking.is_shaking and shaking.is_extremum then

@@ -21,12 +21,24 @@ local light_theme = {
 ---@field version number
 theme = { values = dark_theme, version = 0 }
 
+---@param new_theme "dark" | "light"
+function theme:set(new_theme)
+  if new_theme == "dark" then
+    self.values = dark_theme
+  else
+    self.values = light_theme
+  end
+
+  self.version += 1
+end
+
 function theme:toggle()
   if self.values == dark_theme then
     self.values = light_theme
   else
     self.values = dark_theme
   end
+  
   self.version += 1
 end
 
