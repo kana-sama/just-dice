@@ -5,13 +5,16 @@ import "CoreLibs/animator"
 import "../deps/classic"
 
 import "vector3d"
-import "theme"
 import "progress"
 import "shaking"
-import "die"
+
 import "lock"
 import "fade"
+import "die"
+
+import "config"
 import "stat"
+import "theme"
 
 local INITIAL_DICE_COUNT <const> = 3
 local MAX_DICE_COUNT <const> = 6
@@ -20,6 +23,7 @@ playdate.display.setRefreshRate(50.0)
 
 playdate.getSystemMenu():addOptionsMenuItem("Theme", {"dark", "light"}, "dark", function(new_theme)
   theme:set(new_theme)
+  config:write_theme(new_theme)
 end)
 
 function playdate.gameWillPause()

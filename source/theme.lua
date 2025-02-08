@@ -1,4 +1,7 @@
----@alias theme_values { bg: pd_color, fg: pd_color, bg_pattern: pd_image }
+---@class theme_values
+---@field bg pd_color
+---@field fg pd_color
+---@field bg_pattern pd_image
 
 ---@type theme_values
 local dark_theme = {
@@ -16,12 +19,22 @@ local light_theme = {
     or error("Failed to load images/patterns/forwardslash_light"),
 }
 
+local themes = {
+  dark = dark_theme,
+  light = light_theme,
+}
+
 ---@class theme
 ---@field values theme_values
 ---@field version number
-theme = { values = dark_theme, version = 0 }
+theme = {
+  values = themes[config:read_theme()],
+  version = 0,
+}
 
----@param new_theme "dark" | "light"
+---@alias theme_name "dark" | "light"
+
+---@param new_theme theme_name
 function theme:set(new_theme)
   if new_theme == "dark" then
     self.values = dark_theme
