@@ -139,7 +139,7 @@ function Game:update()
     end
   end
 
-  self.fade:set(self.lock.is_unlocked and shaking.is_shaking)
+  self.fade:set(self.lock:is_unlocked() and shaking.is_shaking)
 
   for i = 1, #self.dice do
     self.dice[i]:update()
