@@ -5,7 +5,7 @@ local EXTREMUM_DEBOUNCE <const> = 5
 
 ---@class shaking
 shaking = {
-  ---@type vector3D[]
+  ---@type Vector3D[]
   history = {};
 
   is_shaking = false;
@@ -17,12 +17,12 @@ shaking = {
   extremum_debounce = 0;
 }
 
----@return vector3D
+---@return Vector3D
 function shaking:last()
   return self.history[#self.history]
 end
 
----@return vector3D
+---@return Vector3D
 function shaking:prev()
   return self.history[#self.history - 1]
 end
@@ -31,12 +31,12 @@ function shaking:update()
   playdate.startAccelerometer()
 
   local x, y, z = playdate.readAccelerometer()
-  table.insert(self.history, vector3D(x, y, z))
+  table.insert(self.history, Vector3D(x, y, z))
   if #self.history > MAX_HISTORY_SIZE then
     table.remove(self.history, 1)
   end
 
-  local average = vector3D.zero()
+  local average = Vector3D.zero()
   for i = 1, #self.history do
     average += self.history[i]
   end

@@ -1,5 +1,5 @@
-local stat_font = playdate.graphics.font.new("fonts/Roobert-11-Mono-Condensed")
-  or error("Failed to load font 'fonts/Roobert-11-Mono-Condensed'")
+local stat_font = playdate.graphics.font.new("assets/fonts/Roobert-11-Mono-Condensed")
+  or error("Failed to load font 'assets/fonts/Roobert-11-Mono-Condensed.fnt'")
 
 ---@class stat
 ---@field rolls table<die_value, integer>

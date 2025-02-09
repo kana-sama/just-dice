@@ -18,6 +18,8 @@
   "Lua.hint.awaitPropagate": true,
   "Lua.hint.enable": true,
   "Lua.diagnostics.disable": [
-    "lowercase-global"
+    "lowercase-global",
+    "redefined-local"
   ],
+  "Lua.diagnostics.libraryFiles": "Disable",
 }

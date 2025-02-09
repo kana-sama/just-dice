@@ -4,19 +4,19 @@
 ---@field bg_pattern pd_image
 
 ---@type theme_values
-local dark_theme = {
+dark_theme = {
   bg = playdate.graphics.kColorBlack,
   fg = playdate.graphics.kColorWhite,
-  bg_pattern = playdate.graphics.image.new("images/patterns/forwardslash_dark")
-    or error("Failed to load images/patterns/forwardslash_dark"),
+  bg_pattern = playdate.graphics.image.new("assets/images/patterns/forwardslash_dark")
+    or error("Failed to load 'assets/images/patterns/forwardslash_dark.png'"),
 }
 
 ---@type theme_values
-local light_theme = {
+light_theme = {
   bg = playdate.graphics.kColorWhite,
   fg = playdate.graphics.kColorBlack,
-  bg_pattern = playdate.graphics.image.new("images/patterns/forwardslash_light")
-    or error("Failed to load images/patterns/forwardslash_light"),
+  bg_pattern = playdate.graphics.image.new("assets/images/patterns/forwardslash_light")
+    or error("Failed to load 'assets/images/patterns/forwardslash_light.png'"),
 }
 
 local themes = {
@@ -73,4 +73,8 @@ function theme:text_draw_mode()
   else
     return playdate.graphics.kDrawModeFillWhite
   end
+end
+
+function theme:is_dark_theme()
+  return self.values == dark_theme
 end
