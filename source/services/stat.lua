@@ -1,5 +1,5 @@
 local stat_font = playdate.graphics.font.new("assets/fonts/Roobert-11-Mono-Condensed")
-  or error("Failed to load font 'assets/fonts/Roobert-11-Mono-Condensed.fnt'")
+    or error("Failed to load font 'assets/fonts/Roobert-11-Mono-Condensed.fnt'")
 
 ---@class stat
 ---@field rolls table<die_value, integer>
@@ -34,9 +34,9 @@ function stat:render()
   local START_Y = 25
 
   local image = playdate.graphics.image.new(400, 240)
-  
+
   playdate.graphics.pushContext(image)
-  
+
   playdate.graphics.setColor(theme:background_color())
   playdate.graphics.setDitherPattern(0.05)
   playdate.graphics.fillRect(0, 0, 400, 240)
@@ -48,7 +48,7 @@ function stat:render()
     local perc = string.format("%.f%%", rolls / self:total() * 100)
 
     dice(i):draw(30, line_y)
-    
+
     playdate.graphics.pushContext()
     playdate.graphics.setImageDrawMode(theme:text_draw_mode())
     playdate.graphics.drawText(rolls, 75, line_y + 4, 50, 20, playdate.graphics.kAlignCenter)
@@ -85,7 +85,7 @@ end
 function dice(value)
   local SIZE <const> = 20
   local RADIUS <const> = 2
-  
+
   local image = playdate.graphics.image.new(SIZE, SIZE)
   playdate.graphics.pushContext(image)
   playdate.graphics.setColor(theme:foreground_color())
