@@ -3,33 +3,37 @@ local REQUIRED_SHAKE_FORCE <const> = 0.3
 local SHAKE_DEBOUNCE <const> = 7
 local EXTREMUM_DEBOUNCE <const> = 5
 
----@class shaking
-shaking = {
-  ---@type Vector3D[]
-  history = {},
+---@class Shaking
+---@field history Vector3D[]
+---@field is_shaking boolean
+---@field is_start_shaking boolean
+---@field is_stop_shaking boolean
+---@field is_extremum boolean
+Shaking = Object:extend()
 
-  is_shaking = false,
-  is_start_shaking = false,
-  is_stop_shaking = false,
-  is_extremum = false,
+function Shaking:new()
+  self.history = {}
 
-  shake_debounce = 0,
-  extremum_debounce = 0,
-}
+  self.is_shaking = false
+  self.is_start_shaking = false
+  self.is_stop_shaking = false
+  self.is_extremum = false
+
+  self.shake_debounce = 0
+  self.extremum_debounce = 0
+end
 
 ---@return Vector3D
-function shaking:last()
+function Shaking:last()
   return self.history[#self.history]
 end
 
 ---@return Vector3D
-function shaking:prev()
+function Shaking:prev()
   return self.history[#self.history - 1]
 end
 
-function shaking:update()
-  playdate.startAccelerometer()
-
+function Shaking:update()
   local x, y, z = playdate.readAccelerometer()
   table.insert(self.history, Vector3D(x, y, z))
   if #self.history > MAX_HISTORY_SIZE then

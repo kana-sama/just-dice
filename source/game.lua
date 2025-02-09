@@ -52,6 +52,7 @@ function Game:new()
   self.background = Background()
   self.fade = Fade()
   self.lock = Lock()
+  self.shaking = Shaking()
 
   set_dice_size(INITIAL_DICE_COUNT)
   for _ = 1, INITIAL_DICE_COUNT do
@@ -102,19 +103,19 @@ function Game:remove_random_die()
 end
 
 function Game:update()
-  shaking:update()
+  self.shaking:update()
   self.fade:update()
   self.lock:update()
   self.background:update()
 
   if self.lock:is_unlocked() then
-    if shaking.is_shaking and shaking.is_extremum then
+    if self.shaking.is_shaking and self.shaking.is_extremum then
       for i = 1, #self.dice do
         self.dice[i]:play_shake_effect()
       end
     end
 
-    if shaking.is_stop_shaking then
+    if self.shaking.is_stop_shaking then
       self:reroll_dice()
     end
 
@@ -134,7 +135,7 @@ function Game:update()
     end
   end
 
-  self.fade:set(self.lock:is_unlocked() and shaking.is_shaking)
+  self.fade:set(self.lock:is_unlocked() and self.shaking.is_shaking)
 
   for i = 1, #self.dice do
     self.dice[i]:update()

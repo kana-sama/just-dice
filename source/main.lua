@@ -1,6 +1,7 @@
 import "CoreLibs/graphics"
 import "CoreLibs/object"
 import "CoreLibs/animator"
+import "CoreLibs/utilities/sampler"
 
 import "utils/classic"
 import "utils/vector3d"
@@ -26,6 +27,7 @@ Z_INDICES = {
 }
 
 playdate.display.setRefreshRate(50.0)
+playdate.startAccelerometer()
 
 playdate.getSystemMenu():addOptionsMenuItem(
   "Theme", { "dark", "light" },
