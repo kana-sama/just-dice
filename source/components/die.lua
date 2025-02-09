@@ -26,7 +26,6 @@ function Die:new()
   self.drawn_cache = nil
 
   self.roll_player = playdate.sound.sampleplayer.new(roll_effect)
-  self.shake_player = playdate.sound.sampleplayer.new(shake_effect)
   
   self.sprite = playdate.graphics.sprite.new()
   self.sprite:setZIndex(Z_INDICES.die)
@@ -51,7 +50,8 @@ function Die:play_shake_effect()
   local offset = math.random() * 0.05
   local volume = 0.6 + math.random() * 0.4
   local rate   = 0.8 + math.random() * 0.4
-  self.shake_player:playAt(offset, volume, nil, rate)
+
+  shake_effect:playAt(offset, volume, nil, rate)
 end
 
 function Die:render()
