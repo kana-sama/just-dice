@@ -4,7 +4,7 @@ local SHAKE_DEBOUNCE <const> = 7
 local EXTREMUM_DEBOUNCE <const> = 5
 
 ---@class Shaking
----@field history Vector3D[]
+---@field history RingBuffer<Vector3D>
 ---@field is_shaking boolean
 ---@field is_start_shaking boolean
 ---@field is_stop_shaking boolean
@@ -12,7 +12,7 @@ local EXTREMUM_DEBOUNCE <const> = 5
 Shaking = Object:extend()
 
 function Shaking:new()
-  self.history = {}
+  self.history = RingBuffer(MAX_HISTORY_SIZE, Vector3D.zero)
 
   self.is_shaking = false
   self.is_start_shaking = false
@@ -23,32 +23,14 @@ function Shaking:new()
   self.extremum_debounce = 0
 end
 
----@return Vector3D
-function Shaking:last()
-  return self.history[#self.history]
-end
-
----@return Vector3D
-function Shaking:prev()
-  return self.history[#self.history - 1]
-end
-
 function Shaking:update()
   local x, y, z = playdate.readAccelerometer()
-  table.insert(self.history, Vector3D(x, y, z))
-  if #self.history > MAX_HISTORY_SIZE then
-    table.remove(self.history, 1)
-  end
+  self.history:push(Vector3D(x or 0, y or 0, z or 0))
 
-  local average = Vector3D.zero()
-  for i = 1, #self.history do
-    average += self.history[i]
-  end
-  local average = #(average / #self.history)
-
+  local average = #self.history:average()
   local total_delta_len = 0
   for i = 1, #self.history do
-    total_delta_len += #self.history[i] - average
+    total_delta_len += #self.history.buffer[i] - average
   end
   total_delta_len /= #self.history
 
@@ -70,9 +52,9 @@ function Shaking:update()
   self.is_start_shaking = not is_shaking_prev and self.is_shaking
   self.is_stop_shaking = is_shaking_prev and not self.is_shaking
 
-  self.is_extremum = self.extremum_debounce <= 0
-      and #self.history > 1
-      and #(self:last() - self:prev()) > 0.5
+  self.is_extremum = true
+      and self.extremum_debounce <= 0
+      and #(self.history:last() - self.history:prev()) > 0.5
 
   if self.is_extremum then
     self.extremum_debounce = EXTREMUM_DEBOUNCE

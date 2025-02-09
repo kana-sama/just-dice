@@ -6,6 +6,7 @@ import "CoreLibs/utilities/sampler"
 import "utils/classic"
 import "utils/vector3d"
 import "utils/progress"
+import "utils/ring_buffer"
 
 import "services/shaking"
 import "services/config"
