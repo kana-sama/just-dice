@@ -26,6 +26,8 @@ function Die:new()
   self.drawn_cache = nil
 
   self.roll_player = playdate.sound.sampleplayer.new(roll_effect)
+  self.roll_player:setRate(0.8 + math.random() * 0.4)
+  self.roll_player:setVolume(0.6 + math.random() * 0.4)
 
   self.sprite = playdate.graphics.sprite.new()
   self.sprite:setZIndex(Z_INDICES.die)
@@ -40,10 +42,8 @@ function Die:roll()
 end
 
 function Die:play_roll_effect()
-  local offset = 0.1 + math.random() * 0.1
-  local volume = 0.6 + math.random() * 0.4
-  local rate   = 0.8 + math.random() * 0.4
-  self.roll_player:playAt(offset, volume, nil, rate)
+  local offset = 0.1 + math.random() * 0.2
+  self.roll_player:playAt(playdate.sound.getCurrentTime() + offset)
 end
 
 function Die:play_shake_effect()
@@ -51,7 +51,7 @@ function Die:play_shake_effect()
   local volume = 0.6 + math.random() * 0.4
   local rate   = 0.8 + math.random() * 0.4
 
-  shake_effect:playAt(offset, volume, nil, rate)
+  shake_effect:playAt(playdate.sound.getCurrentTime() + offset, volume, nil, rate)
 end
 
 function Die:render()

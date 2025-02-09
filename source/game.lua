@@ -116,10 +116,6 @@ function Game:update()
 
     if shaking.is_stop_shaking then
       self:reroll_dice()
-
-      for i = 1, #self.dice do
-        self.dice[i]:play_roll_effect()
-      end
     end
 
     if playdate.buttonJustPressed(playdate.kButtonRight) or playdate.buttonJustPressed(playdate.kButtonUp) then
