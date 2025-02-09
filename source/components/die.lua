@@ -10,11 +10,6 @@ local shake_effect = playdate.sound.sample.new("assets/audio/shake")
 
 ---@class Die
 ---@field value die_value
----@field position pd_point
----@field angle number
----@field image pd_image
----@field sprite pd_sprite
----@field show_animation pd_animator
 ---@field drawn_cache? { theme_version: number, value: die_value, angle: number, size: number }
 ---@overload fun(): Die
 Die = Object:extend()
@@ -29,6 +24,9 @@ function Die:new()
   self.image = playdate.graphics.image.new(Die.size, Die.size)
   self.show_animation = playdate.graphics.animator.new(500, 0, 1, playdate.easingFunctions.outCirc)
   self.drawn_cache = nil
+
+  self.roll_player = playdate.sound.sampleplayer.new(roll_effect)
+  self.shake_player = playdate.sound.sampleplayer.new(shake_effect)
   
   self.sprite = playdate.graphics.sprite.new()
   self.sprite:setZIndex(Z_INDICES.die)
@@ -46,16 +44,14 @@ function Die:play_roll_effect()
   local offset = 0.1 + math.random() * 0.1
   local volume = 0.6 + math.random() * 0.4
   local rate   = 0.8 + math.random() * 0.4
-
-  roll_effect:playAt(offset, volume, nil, rate)
+  self.roll_player:playAt(offset, volume, nil, rate)
 end
 
 function Die:play_shake_effect()
   local offset = math.random() * 0.05
   local volume = 0.6 + math.random() * 0.4
   local rate   = 0.8 + math.random() * 0.4
-
-  shake_effect:playAt(offset, volume, nil, rate)
+  self.shake_player:playAt(offset, volume, nil, rate)
 end
 
 function Die:render()

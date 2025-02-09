@@ -39,7 +39,7 @@ end
 local game = Game()
 
 function playdate.update()
-  playdate.graphics.sprite:update()
   game:update()
-  -- playdate.drawFPS(0,0)
+  playdate.graphics.sprite:update()
+  -- playdate.drawFPS(0, 0)
 end
