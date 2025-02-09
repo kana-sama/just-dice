@@ -1,10 +1,10 @@
 INITIAL_DIE_SIZE = 50
 
 local roll_effect = playdate.sound.sample.new("assets/audio/roll")
-  or error("Failed to load 'assets/audio/roll.wav'")
+    or error("Failed to load 'assets/audio/roll.wav'")
 
 local shake_effect = playdate.sound.sample.new("assets/audio/shake")
-  or error("Failed to load 'assets/audio/shake.wav'")
+    or error("Failed to load 'assets/audio/shake.wav'")
 
 ---@alias die_value 1 | 2 | 3 | 4 | 5 | 6
 
@@ -26,7 +26,7 @@ function Die:new()
   self.drawn_cache = nil
 
   self.roll_player = playdate.sound.sampleplayer.new(roll_effect)
-  
+
   self.sprite = playdate.graphics.sprite.new()
   self.sprite:setZIndex(Z_INDICES.die)
   self.sprite:add()
@@ -111,10 +111,10 @@ end
 
 function Die:is_cache_invalidated()
   return not self.drawn_cache
-    or self.drawn_cache.theme_version ~= theme.version
-    or self.drawn_cache.value ~= self.value
-    or self.drawn_cache.angle ~= self.angle
-    or self.drawn_cache.size ~= Die.size
+      or self.drawn_cache.theme_version ~= theme.version
+      or self.drawn_cache.value ~= self.value
+      or self.drawn_cache.angle ~= self.angle
+      or self.drawn_cache.size ~= Die.size
 end
 
 function Die:update()

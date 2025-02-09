@@ -6,15 +6,15 @@ local EXTREMUM_DEBOUNCE <const> = 5
 ---@class shaking
 shaking = {
   ---@type Vector3D[]
-  history = {};
+  history = {},
 
-  is_shaking = false;
-  is_start_shaking = false;
-  is_stop_shaking = false;
-  is_extremum = false;
+  is_shaking = false,
+  is_start_shaking = false,
+  is_stop_shaking = false,
+  is_extremum = false,
 
-  shake_debounce = 0;
-  extremum_debounce = 0;
+  shake_debounce = 0,
+  extremum_debounce = 0,
 }
 
 ---@return Vector3D
@@ -67,8 +67,8 @@ function shaking:update()
   self.is_stop_shaking = is_shaking_prev and not self.is_shaking
 
   self.is_extremum = self.extremum_debounce <= 0
-    and #self.history > 1
-    and #(self:last() - self:prev()) > 0.5
+      and #self.history > 1
+      and #(self:last() - self:prev()) > 0.5
 
   if self.is_extremum then
     self.extremum_debounce = EXTREMUM_DEBOUNCE

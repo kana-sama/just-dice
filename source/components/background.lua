@@ -16,7 +16,7 @@ end
 ---@return pd_image
 function Background:render(theme)
   local image = playdate.graphics.image.new(playdate.display.getWidth(), playdate.display.getHeight())
-  
+
   playdate.graphics.pushContext(image)
   playdate.graphics.setBackgroundColor(playdate.graphics.kColorBlack)
   playdate.graphics.clear()

@@ -24,7 +24,6 @@ function find_free_place_for_die(other)
     if attempts > 20 then
       return nil
     end
-
   until not overlaps
 
   return position
@@ -56,7 +55,7 @@ function Game:new()
 
   set_dice_size(INITIAL_DICE_COUNT)
   for _ = 1, INITIAL_DICE_COUNT do
-    self:add_dice({Die()})
+    self:add_dice({ Die() })
   end
 end
 
@@ -126,7 +125,7 @@ function Game:update()
     if playdate.buttonJustPressed(playdate.kButtonRight) or playdate.buttonJustPressed(playdate.kButtonUp) then
       if #self.dice < MAX_DICE_COUNT then
         set_dice_size(#self.dice + 1)
-        self:add_dice({Die()})
+        self:add_dice({ Die() })
       end
     end
 

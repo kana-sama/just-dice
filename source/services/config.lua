@@ -18,4 +18,3 @@ function config:write_theme(theme)
   value.theme = theme
   playdate.datastore.write(value, "config")
 end
-

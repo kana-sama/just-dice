@@ -8,7 +8,7 @@ dark_theme = {
   bg = playdate.graphics.kColorBlack,
   fg = playdate.graphics.kColorWhite,
   bg_pattern = playdate.graphics.image.new("assets/images/patterns/forwardslash_dark")
-    or error("Failed to load 'assets/images/patterns/forwardslash_dark.png'"),
+      or error("Failed to load 'assets/images/patterns/forwardslash_dark.png'"),
 }
 
 ---@type theme_values
@@ -16,7 +16,7 @@ light_theme = {
   bg = playdate.graphics.kColorWhite,
   fg = playdate.graphics.kColorBlack,
   bg_pattern = playdate.graphics.image.new("assets/images/patterns/forwardslash_light")
-    or error("Failed to load 'assets/images/patterns/forwardslash_light.png'"),
+      or error("Failed to load 'assets/images/patterns/forwardslash_light.png'"),
 }
 
 local themes = {
@@ -51,7 +51,7 @@ function theme:toggle()
   else
     self.values = dark_theme
   end
-  
+
   self.version += 1
 end
 
