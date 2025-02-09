@@ -2,8 +2,7 @@ import "CoreLibs/graphics"
 import "CoreLibs/object"
 import "CoreLibs/animator"
 
-import "../deps/classic"
-
+import "utils/classic"
 import "utils/vector3d"
 import "utils/progress"
 
