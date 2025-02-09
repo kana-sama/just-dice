@@ -27,10 +27,13 @@ Z_INDICES = {
 
 playdate.display.setRefreshRate(50.0)
 
-playdate.getSystemMenu():addOptionsMenuItem("Theme", {"dark", "light"}, "dark", function(new_theme)
-  theme:set(new_theme)
-  config:write_theme(new_theme)
-end)
+playdate.getSystemMenu():addOptionsMenuItem(
+  "Theme", {"dark", "light"},
+  config:read_theme(), function(new_theme)
+    theme:set(new_theme)
+    config:write_theme(new_theme)
+  end
+)
 
 function playdate.gameWillPause()
   playdate.setMenuImage(stat:render())
