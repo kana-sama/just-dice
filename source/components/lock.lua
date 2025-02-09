@@ -37,7 +37,19 @@ function Lock:update()
     self.progress:forward()
   end
 
+  if self.progress.changed then
+    self.sprite:setImage(self:render())
+    self.sprite:moveTo(
+      playdate.display.getWidth() - 30 + 50 * (1 - interval(self.progress:progress(), 0, 0.8)),
+      playdate.display.getHeight() - 40
+    )
+  end
+end
+
+---@return pd_image
+function Lock:render()
   local image = playdate.graphics.image.new(20, 30)
+  
   playdate.graphics.pushContext(image)
   playdate.graphics.setColor(theme:foreground_color())
   playdate.graphics.fillRoundRect(0, 10, 20, 20, 5)
@@ -46,12 +58,7 @@ function Lock:update()
   playdate.graphics.drawLine(15, 6 + 3 * interval(self.progress:progress(), 0.8, 1), 15, 16)
   playdate.graphics.popContext()
 
-  self.sprite:setImage(image)
-
-  self.sprite:moveTo(
-    playdate.display.getWidth() - 30 + 50 * (1 - interval(self.progress:progress(), 0, 0.8)),
-    playdate.display.getHeight() - 40
-  )
+  return image
 end
 
 function Lock:is_unlocked()
