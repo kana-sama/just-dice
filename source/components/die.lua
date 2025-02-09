@@ -1,5 +1,3 @@
-INITIAL_DIE_SIZE = 50
-
 local roll_effect = playdate.sound.sample.new("assets/audio/roll")
     or error("Failed to load 'assets/audio/roll.wav'")
 
@@ -11,19 +9,20 @@ local shake_effect = playdate.sound.sample.new("assets/audio/shake")
 ---@class Die
 ---@field value die_value
 ---@field drawn_cache? { theme_version: number, value: die_value, angle: number, size: number }
----@overload fun(): Die
+---@overload fun(size: number): Die
 Die = Object:extend()
 
-Die.size = INITIAL_DIE_SIZE
-
 ---@param self Die
-function Die:new()
+---@param size number
+function Die:new(size)
   self.value = nil
-  self.position = playdate.geometry.point.new(0, 0)
-  self.angle = math.random(360)
-  self.image = playdate.graphics.image.new(Die.size, Die.size)
-  self.show_animation = playdate.graphics.animator.new(500, 0, 1, playdate.easingFunctions.outCirc)
+  self.angle = nil
   self.drawn_cache = nil
+  
+  self.size = size
+  self.position = playdate.geometry.point.new(0, 0)
+
+  self.roll_animation = playdate.graphics.animator.new(500, 0, 1, playdate.easingFunctions.outCirc)
 
   self.roll_player = playdate.sound.sampleplayer.new(roll_effect)
   self.roll_player:setRate(0.8 + math.random() * 0.4)
@@ -32,18 +31,25 @@ function Die:new()
   self.sprite = playdate.graphics.sprite.new()
   self.sprite:setZIndex(Z_INDICES.die)
   self.sprite:add()
+
+  self:randomize()
 end
 
-function Die:roll()
+function Die:randomize()
   self.value = math.random(6)
-  self.show_animation:reset()
-  self:play_roll_effect()
+  self.angle = math.random(360)
   stat:add_die(self.value)
 end
 
+function Die:roll()
+  self.roll_animation:reset()
+  self:play_roll_effect()
+end
+
 function Die:play_roll_effect()
-  local offset = 0.1 + math.random() * 0.2
-  self.roll_player:playAt(playdate.sound.getCurrentTime() + offset)
+  local delay = 0.1 + math.random() * 0.2
+  self.roll_player:setOffset(0.2)
+  self.roll_player:playAt(playdate.sound.getCurrentTime() + delay)
 end
 
 function Die:play_shake_effect()
@@ -54,50 +60,51 @@ function Die:play_shake_effect()
   shake_effect:playAt(playdate.sound.getCurrentTime() + offset, volume, nil, rate)
 end
 
-function Die:render()
-  local image = playdate.graphics.image.new(Die.size, Die.size)
+---@param value die_value
+---@param size number
+---@return pd_image
+function Die.render(value, size)
+  local image = playdate.graphics.image.new(size, size)
 
   playdate.graphics.pushContext(image)
 
   playdate.graphics.setColor(theme:foreground_color())
-  playdate.graphics.fillRoundRect(0, 0, Die.size, Die.size, 15)
+  playdate.graphics.fillRoundRect(0, 0, size, size, size / 5)
 
   playdate.graphics.setColor(theme:background_color())
-  local radius = Die.size * 0.1
-  if self.value == 1 then
-    playdate.graphics.fillCircleAtPoint(Die.size / 2, Die.size / 2, radius)
-  elseif self.value == 2 then
-    playdate.graphics.fillCircleAtPoint(Die.size / 4, Die.size / 4, radius)
-    playdate.graphics.fillCircleAtPoint(Die.size / 4 * 3, Die.size / 4 * 3, radius)
-  elseif self.value == 3 then
-    playdate.graphics.fillCircleAtPoint(Die.size / 4, Die.size / 4, radius)
-    playdate.graphics.fillCircleAtPoint(Die.size / 2, Die.size / 2, radius)
-    playdate.graphics.fillCircleAtPoint(Die.size / 4 * 3, Die.size / 4 * 3, radius)
-  elseif self.value == 4 then
-    playdate.graphics.fillCircleAtPoint(Die.size / 4, Die.size / 4, radius)
-    playdate.graphics.fillCircleAtPoint(Die.size / 4 * 3, Die.size / 4, radius)
-    playdate.graphics.fillCircleAtPoint(Die.size / 4, Die.size / 4 * 3, radius)
-    playdate.graphics.fillCircleAtPoint(Die.size / 4 * 3, Die.size / 4 * 3, radius)
-  elseif self.value == 5 then
-    playdate.graphics.fillCircleAtPoint(Die.size / 4, Die.size / 4, radius)
-    playdate.graphics.fillCircleAtPoint(Die.size / 4 * 3, Die.size / 4, radius)
-    playdate.graphics.fillCircleAtPoint(Die.size / 4, Die.size / 4 * 3, radius)
-    playdate.graphics.fillCircleAtPoint(Die.size / 4 * 3, Die.size / 4 * 3, radius)
-    playdate.graphics.fillCircleAtPoint(Die.size / 2, Die.size / 2, radius)
-  elseif self.value == 6 then
-    playdate.graphics.fillCircleAtPoint(Die.size / 4, Die.size / 4, radius)
-    playdate.graphics.fillCircleAtPoint(Die.size / 4 * 3, Die.size / 4, radius)
-    playdate.graphics.fillCircleAtPoint(Die.size / 4, Die.size / 4 * 3, radius)
-    playdate.graphics.fillCircleAtPoint(Die.size / 4 * 3, Die.size / 4 * 3, radius)
-    playdate.graphics.fillCircleAtPoint(Die.size / 4, Die.size / 2, radius)
-    playdate.graphics.fillCircleAtPoint(Die.size / 4 * 3, Die.size / 2, radius)
+  local radius = size * 0.1
+  if value == 1 then
+    playdate.graphics.fillCircleAtPoint(size / 2, size / 2, radius)
+  elseif value == 2 then
+    playdate.graphics.fillCircleAtPoint(size / 4, size / 4, radius)
+    playdate.graphics.fillCircleAtPoint(size / 4 * 3, size / 4 * 3, radius)
+  elseif value == 3 then
+    playdate.graphics.fillCircleAtPoint(size / 4, size / 4, radius)
+    playdate.graphics.fillCircleAtPoint(size / 2, size / 2, radius)
+    playdate.graphics.fillCircleAtPoint(size / 4 * 3, size / 4 * 3, radius)
+  elseif value == 4 then
+    playdate.graphics.fillCircleAtPoint(size / 4, size / 4, radius)
+    playdate.graphics.fillCircleAtPoint(size / 4 * 3, size / 4, radius)
+    playdate.graphics.fillCircleAtPoint(size / 4, size / 4 * 3, radius)
+    playdate.graphics.fillCircleAtPoint(size / 4 * 3, size / 4 * 3, radius)
+  elseif value == 5 then
+    playdate.graphics.fillCircleAtPoint(size / 4, size / 4, radius)
+    playdate.graphics.fillCircleAtPoint(size / 4 * 3, size / 4, radius)
+    playdate.graphics.fillCircleAtPoint(size / 4, size / 4 * 3, radius)
+    playdate.graphics.fillCircleAtPoint(size / 4 * 3, size / 4 * 3, radius)
+    playdate.graphics.fillCircleAtPoint(size / 2, size / 2, radius)
+  elseif value == 6 then
+    playdate.graphics.fillCircleAtPoint(size / 4, size / 4, radius)
+    playdate.graphics.fillCircleAtPoint(size / 4 * 3, size / 4, radius)
+    playdate.graphics.fillCircleAtPoint(size / 4, size / 4 * 3, radius)
+    playdate.graphics.fillCircleAtPoint(size / 4 * 3, size / 4 * 3, radius)
+    playdate.graphics.fillCircleAtPoint(size / 4, size / 2, radius)
+    playdate.graphics.fillCircleAtPoint(size / 4 * 3, size / 2, radius)
   end
 
   playdate.graphics.popContext()
 
-  self.image = image:rotatedImage(self.angle)
-  self.sprite:setImage(self.image)
-  self:save_cache()
+  return image
 end
 
 function Die:save_cache()
@@ -105,7 +112,7 @@ function Die:save_cache()
     theme_version = theme.version,
     angle = self.angle,
     value = self.value,
-    size = Die.size,
+    size = self.size,
   }
 end
 
@@ -114,17 +121,19 @@ function Die:is_cache_invalidated()
       or self.drawn_cache.theme_version ~= theme.version
       or self.drawn_cache.value ~= self.value
       or self.drawn_cache.angle ~= self.angle
-      or self.drawn_cache.size ~= Die.size
+      or self.drawn_cache.size ~= self.size
 end
 
 function Die:update()
   if self:is_cache_invalidated() then
-    self:render()
+    local image = Die.render(self.value, self.size):rotatedImage(self.angle)
+    self.sprite:setImage(image)
+    self:save_cache()
   end
 
   self.sprite:moveTo(
-    self.position.x * self.show_animation:currentValue(),
-    self.position.y * self.show_animation:currentValue()
+    self.position.x * self.roll_animation:currentValue(),
+    self.position.y * self.roll_animation:currentValue()
   )
 end
 

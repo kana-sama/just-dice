@@ -1,9 +1,11 @@
+import "CoreLibs/math"
 import "CoreLibs/graphics"
 import "CoreLibs/object"
 import "CoreLibs/animator"
 import "CoreLibs/utilities/sampler"
 
 import "utils/classic"
+import "utils/lerp"
 import "utils/vector3d"
 import "utils/progress"
 import "utils/ring_buffer"
@@ -25,6 +27,15 @@ Z_INDICES = {
   die = 1,
   lock = 2,
   fade = 10,
+}
+
+DIE_SIZES = {
+  [1] = 70,
+  [2] = 70,
+  [3] = 60,
+  [4] = 60,
+  [5] = 50,
+  [6] = 50,
 }
 
 playdate.display.setRefreshRate(50.0)

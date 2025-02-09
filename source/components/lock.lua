@@ -1,20 +1,3 @@
----@param value number
----@param from number
----@param to number
----@return number
-local function interval(value, from, to)
-  if value < from then
-    return 0
-  end
-
-  if value > to then
-    return 1
-  end
-
-  return (value - from) / (to - from)
-end
-
-
 ---@class Lock
 ---@overload fun(): Lock
 Lock = Object:extend()
@@ -40,7 +23,7 @@ function Lock:update()
   if self.progress.changed then
     self.sprite:setImage(self:render())
     self.sprite:moveTo(
-      playdate.display.getWidth() - 30 + 50 * (1 - interval(self.progress:progress(), 0, 0.8)),
+      playdate.display.getWidth() - 30 + 50 * (1 - self.progress:subprogress(0, 0.8)),
       playdate.display.getHeight() - 40
     )
   end
@@ -54,8 +37,8 @@ function Lock:render()
   playdate.graphics.setColor(theme:foreground_color())
   playdate.graphics.fillRoundRect(0, 10, 20, 20, 5)
   playdate.graphics.setLineWidth(3)
-  playdate.graphics.drawArc(10, 7 + 3 * interval(self.progress:progress(), 0.8, 1), 6, -90, 90)
-  playdate.graphics.drawLine(15, 6 + 3 * interval(self.progress:progress(), 0.8, 1), 15, 16)
+  playdate.graphics.drawArc(10, 7 + 3 * self.progress:subprogress(0.8, 1), 6, -90, 90)
+  playdate.graphics.drawLine(15, 6 + 3 * self.progress:subprogress(0.8, 1), 15, 16)
   playdate.graphics.popContext()
 
   return image

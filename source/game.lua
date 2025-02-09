@@ -1,45 +1,7 @@
 local INITIAL_DICE_COUNT <const> = 3
 local MAX_DICE_COUNT <const> = 6
 
----@param other pd_point[]
----@return pd_point?
-function find_free_place_for_die(other)
-  local position = playdate.geometry.point.new(0, 0)
-  local attempts = 0
-  repeat
-    local overlaps = false
-
-    position.x = math.random(Die.size, math.floor(playdate.display.getWidth() - Die.size * 1.5))
-    position.y = math.random(Die.size, math.floor(playdate.display.getHeight() - Die.size * 1.5))
-
-    for i = 1, #other do
-      if other[i]:distanceToPoint(position) < Die.size * 1.41 then
-        overlaps = true
-        break
-      end
-    end
-
-    attempts += 1
-
-    if attempts > 20 then
-      return nil
-    end
-  until not overlaps
-
-  return position
-end
-
----@param size number
-local function set_dice_size(size)
-  if size <= 2 then
-    Die.size = 70
-  elseif size <= 4 then
-    Die.size = 60
-  else
-    Die.size = 50
-  end
-end
-
+local find_free_place_for_die
 
 ---@class Game
 ---@overload fun(): Game
@@ -49,27 +11,45 @@ function Game:new()
   ---@type Die[]
   self.dice = {}
 
+  ---@type Die[]
+  self.random_task_list = {}
+
+  self.die_size = DIE_SIZES[INITIAL_DICE_COUNT]
+
   self.background = Background()
   self.fade = Fade()
   self.lock = Lock()
   self.shaking = Shaking()
 
-  set_dice_size(INITIAL_DICE_COUNT)
   for _ = 1, INITIAL_DICE_COUNT do
-    self:add_dice({ Die() })
+    local die = Die(self.die_size)
+    self:add_dice({ die })
+    die:roll()
+  end
+end
+
+function Game:set_dice_size(size)
+  for _, die in ipairs(self.dice) do
+    die.size = size
   end
 end
 
 ---@param new_dice Die[]
+---@return Die[] moved_dice
 function Game:add_dice(new_dice)
   ---@type pd_point[]
   local positions = {}
-  for i = 1, #self.dice do
-    table.insert(positions, self.dice[i].position)
+
+  for i, die in ipairs(self.dice) do
+    positions[i] = die.position
   end
 
-  while #positions < #self.dice + #new_dice do
-    local position = find_free_place_for_die(positions)
+  for _, new_die in ipairs(new_dice) do
+    table.insert(self.dice, new_die)
+  end
+
+  while #positions < #self.dice do
+    local position = find_free_place_for_die(self.die_size, positions)
     if position then
       table.insert(positions, position)
     else
@@ -77,22 +57,27 @@ function Game:add_dice(new_dice)
     end
   end
 
-  for i = 1, #new_dice do
-    table.insert(self.dice, new_dice[i])
-  end
+  ---@type Die[]
+  local moved_dice = {}
 
-  for i = 1, #positions do
-    if self.dice[i].position ~= positions[i] then
-      self.dice[i].position = positions[i]
-      self.dice[i]:roll()
+  for i, die in ipairs(self.dice) do
+    if die.position ~= positions[i] then
+      die.position = positions[i]
+      table.insert(moved_dice, die)
     end
   end
+
+  return moved_dice
 end
 
 function Game:reroll_dice()
-  local prev_dice = self.dice
+  local dice = self.dice
   self.dice = {}
-  self:add_dice(prev_dice)
+  self:add_dice(dice)
+  
+  for _, die in ipairs(self.dice) do
+    die:roll()
+  end
 end
 
 function Game:remove_random_die()
@@ -109,26 +94,46 @@ function Game:update()
   self.background:update()
 
   if self.lock:is_unlocked() then
+    if self.shaking.is_start_shaking then
+      self.random_task_list = {}
+      table.shallowcopy(self.dice, self.random_task_list)
+    end
+
+    if self.shaking.is_shaking and self.fade:is_faded() and #self.random_task_list > 0 then
+      ---@type Die
+      local die = table.remove(self.random_task_list)
+      die:randomize()
+    end
+
     if self.shaking.is_shaking and self.shaking.is_extremum then
-      for i = 1, #self.dice do
-        self.dice[i]:play_shake_effect()
+      for _, die in ipairs(self.dice) do
+        die:play_shake_effect()
       end
     end
 
     if self.shaking.is_stop_shaking then
+      while #self.random_task_list > 0 do
+        table.remove(self.random_task_list):roll()
+      end
+
       self:reroll_dice()
     end
 
     if playdate.buttonJustPressed(playdate.kButtonRight) or playdate.buttonJustPressed(playdate.kButtonUp) then
       if #self.dice < MAX_DICE_COUNT then
-        set_dice_size(#self.dice + 1)
-        self:add_dice({ Die() })
+        self.die_size = DIE_SIZES[#self.dice + 1]
+        
+        local moved_die = self:add_dice({ Die() })
+        for _, die in ipairs(moved_die) do
+          die:roll()
+        end
       end
     end
 
     if playdate.buttonJustPressed(playdate.kButtonLeft) or playdate.buttonJustPressed(playdate.kButtonDown) then
       if #self.dice > 1 then
-        set_dice_size(#self.dice - 1)
+        self.die_size = DIE_SIZES[#self.dice - 1]
+        
         self:remove_random_die()
         self:reroll_dice()
       end
@@ -137,7 +142,38 @@ function Game:update()
 
   self.fade:set(self.lock:is_unlocked() and self.shaking.is_shaking)
 
-  for i = 1, #self.dice do
-    self.dice[i]:update()
+  self.die_size = DIE_SIZES[#self.dice]
+  for _, die in ipairs(self.dice) do
+    die.size = self.die_size
+    die:update()
   end
+end
+
+---@param die_size number
+---@param other pd_point[]
+---@return pd_point?
+function find_free_place_for_die(die_size, other)
+  local position = playdate.geometry.point.new(0, 0)
+  local attempts = 0
+  repeat
+    if attempts > 20 then
+      return nil
+    end
+
+    local overlaps = false
+
+    position.x = math.random(die_size, math.floor(playdate.display.getWidth() - die_size * 1.5))
+    position.y = math.random(die_size, math.floor(playdate.display.getHeight() - die_size * 1.5))
+
+    for _, other_position in ipairs(other) do
+      if other_position:distanceToPoint(position) < die_size * 1.41 then
+        overlaps = true
+        break
+      end
+    end
+
+    attempts += 1
+  until not overlaps
+
+  return position
 end

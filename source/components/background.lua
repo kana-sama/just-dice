@@ -3,8 +3,8 @@
 Background = Object:extend()
 
 function Background:new()
-  self.dark_image = self:render(dark_theme)
-  self.light_image = self:render(light_theme)
+  self.dark_image = Background.render(dark_theme)
+  self.light_image = Background.render(light_theme)
 
   self.sprite = playdate.graphics.sprite.new()
   self.sprite:setCenter(0, 0)
@@ -14,7 +14,7 @@ end
 
 ---@param theme theme_values
 ---@return pd_image
-function Background:render(theme)
+function Background.render(theme)
   local image = playdate.graphics.image.new(playdate.display.getWidth(), playdate.display.getHeight())
 
   playdate.graphics.pushContext(image)

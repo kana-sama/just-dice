@@ -35,7 +35,26 @@ function Progress:backward()
   self.is_forward = false
 end
 
--- @return number
+---@return number
 function Progress:progress()
   return self.current_value / self.duration
+end
+
+--- Maps the part of the progress between `from` and `to` to the range [0, 1].
+---
+---@param from number
+---@param to number
+---@return number
+function Progress:subprogress(from, to)
+  local value = self:progress()
+
+  if value < from then
+    return 0
+  end
+
+  if value > to then
+    return 1
+  end
+
+  return (value - from) / (to - from)
 end

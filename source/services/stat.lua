@@ -1,6 +1,8 @@
 local stat_font = playdate.graphics.font.new("assets/fonts/Roobert-11-Mono-Condensed")
     or error("Failed to load font 'assets/fonts/Roobert-11-Mono-Condensed.fnt'")
 
+local shorten
+
 ---@class stat
 ---@field rolls table<die_value, integer>
 stat = {
@@ -47,7 +49,7 @@ function stat:render()
     local rolls = shorten(self.rolls[i])
     local perc = string.format("%.f%%", rolls / self:total() * 100)
 
-    dice(i):draw(30, line_y)
+    Die.render(i, 20):draw(30, line_y)
 
     playdate.graphics.pushContext()
     playdate.graphics.setImageDrawMode(theme:text_draw_mode())
@@ -66,6 +68,7 @@ function stat:render()
   return image
 end
 
+
 ---@param value integer
 ---@return string
 function shorten(value)
@@ -78,49 +81,4 @@ function shorten(value)
   else
     return "..."
   end
-end
-
----@param value die_value
----@return pd_image
-function dice(value)
-  local SIZE <const> = 20
-  local RADIUS <const> = 2
-
-  local image = playdate.graphics.image.new(SIZE, SIZE)
-  playdate.graphics.pushContext(image)
-  playdate.graphics.setColor(theme:foreground_color())
-  playdate.graphics.fillRoundRect(0, 0, SIZE, SIZE, 2)
-
-  playdate.graphics.setColor(theme:background_color())
-  if value == 1 then
-    playdate.graphics.fillCircleAtPoint(SIZE / 2, SIZE / 2, RADIUS)
-  elseif value == 2 then
-    playdate.graphics.fillCircleAtPoint(SIZE / 4, SIZE / 4, RADIUS)
-    playdate.graphics.fillCircleAtPoint(SIZE / 4 * 3, SIZE / 4 * 3, RADIUS)
-  elseif value == 3 then
-    playdate.graphics.fillCircleAtPoint(SIZE / 4, SIZE / 4, RADIUS)
-    playdate.graphics.fillCircleAtPoint(SIZE / 2, SIZE / 2, RADIUS)
-    playdate.graphics.fillCircleAtPoint(SIZE / 4 * 3, SIZE / 4 * 3, RADIUS)
-  elseif value == 4 then
-    playdate.graphics.fillCircleAtPoint(SIZE / 4, SIZE / 4, RADIUS)
-    playdate.graphics.fillCircleAtPoint(SIZE / 4 * 3, SIZE / 4, RADIUS)
-    playdate.graphics.fillCircleAtPoint(SIZE / 4, SIZE / 4 * 3, RADIUS)
-    playdate.graphics.fillCircleAtPoint(SIZE / 4 * 3, SIZE / 4 * 3, RADIUS)
-  elseif value == 5 then
-    playdate.graphics.fillCircleAtPoint(SIZE / 4, SIZE / 4, RADIUS)
-    playdate.graphics.fillCircleAtPoint(SIZE / 4 * 3, SIZE / 4, RADIUS)
-    playdate.graphics.fillCircleAtPoint(SIZE / 4, SIZE / 4 * 3, RADIUS)
-    playdate.graphics.fillCircleAtPoint(SIZE / 4 * 3, SIZE / 4 * 3, RADIUS)
-    playdate.graphics.fillCircleAtPoint(SIZE / 2, SIZE / 2, RADIUS)
-  elseif value == 6 then
-    playdate.graphics.fillCircleAtPoint(SIZE / 4, SIZE / 4, RADIUS)
-    playdate.graphics.fillCircleAtPoint(SIZE / 4 * 3, SIZE / 4, RADIUS)
-    playdate.graphics.fillCircleAtPoint(SIZE / 4, SIZE / 4 * 3, RADIUS)
-    playdate.graphics.fillCircleAtPoint(SIZE / 4 * 3, SIZE / 4 * 3, RADIUS)
-    playdate.graphics.fillCircleAtPoint(SIZE / 4, SIZE / 2, RADIUS)
-    playdate.graphics.fillCircleAtPoint(SIZE / 4 * 3, SIZE / 2, RADIUS)
-  end
-
-  playdate.graphics.popContext()
-  return image
 end

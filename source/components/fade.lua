@@ -42,3 +42,8 @@ function Fade:update()
     self.sprite:setImage(self:render())
   end
 end
+
+---@return boolean
+function Fade:is_faded()
+  return self.progress.current_value == self.progress.duration
+end
