@@ -43,11 +43,11 @@ function RingBuffer:nth(index)
 end
 
 function RingBuffer:last()
-  return self.buffer[self.index]
+  return self:nth(0)
 end
 
 function RingBuffer:prev()
-  return self:nth(0)
+  return self:nth(-1)
 end
 
 function RingBuffer:average()
