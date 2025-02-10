@@ -290,6 +290,10 @@ function Game:select_die()
 
   cursor:remove()
 
+  for _, die in ipairs(self.dice) do
+    die:unhighlight()
+  end
+
   if selected then
     self.last_selected_die = selected
     return self.dice[selected], selected
