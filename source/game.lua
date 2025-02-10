@@ -15,12 +15,18 @@ function Game:new()
   self.remove_task_list = {}
 
   ---@type Die[]
-  self.random_task_list = {}
+  self.random_task_queue = {}
+
+  ---@type table<integer, boolean>
+  self.selected = {}
+  self.active_die = 1
+  self.prev_active_die = 1
+
+  ---@type Cursor?
+  self.cursor = nil
 
   self.screen_shaking = 0
-
-  self.last_selected_die = 1
-
+  
   self.die_size = DIE_SIZES[INITIAL_DICE_COUNT]
 
   self.background = Background()
@@ -86,6 +92,11 @@ end
 ---@param index integer
 function Game:remove_die(index)
   local die = table.remove_elem(self.dice, index)
+  if not die then
+    print("Game:remove_die was called with wrong index " .. index)
+    return
+  end
+
   table.insert(self.remove_task_list, die)
   die:start_removing()
 
@@ -95,37 +106,59 @@ function Game:remove_die(index)
   end
 
   if not is_valid_positions(DIE_SIZES[#self.dice], positions) then
-    self:reroll_dice()
+    self:roll_all_dice()
   end
 end
 
----@param die_index integer
-function Game:reroll_die(die_index)
-  self:remove_die(die_index)
+---@param dice_indices_to_reroll integer[]
+function Game:roll_dice_by_indices(dice_indices_to_reroll)
+  ---@type Die[]
+  local dice_to_reroll = {}
+  table.sort(dice_indices_to_reroll, function(a, b) return a > b end)
+  for _, die_index in ipairs(dice_indices_to_reroll) do
+    local die = table.remove_elem(self.dice, die_index)
+    table.insert(dice_to_reroll, die)
+  end  
 
-  local die = Die(self.die_size)
-  self:add_dice({ die })
-  die:roll()
-end
-
-function Game:reroll_dice()
-  local dice = self.dice
-  self.dice = {}
-  self:add_dice(dice)
-  
-  for _, die in ipairs(self.dice) do
+  self:add_dice(dice_to_reroll)
+  for _, die in ipairs(dice_to_reroll) do
     die:roll()
   end
 end
 
-function Game:logic()
-  if self.shaking.is_start_shaking then
-    self.random_task_list = {}
-    table.shallowcopy(self.dice, self.random_task_list)
+function Game:roll_all_dice()
+  local dice_indices_to_reroll = {}
+
+  for i, _ in ipairs(self.dice) do
+    table.insert(dice_indices_to_reroll, i)
   end
 
-  if self.shaking.is_shaking and self.fade:is_faded_in() and #self.random_task_list > 0 then
-    local die = table.remove_elem(self.random_task_list, 1)
+  self:roll_dice_by_indices(dice_indices_to_reroll)
+end
+
+function Game:roll_selected_dice()
+  local dice_indices_to_reroll = {}
+
+  for i, _ in ipairs(self.dice) do
+    if self.selected[i] then
+      table.insert(dice_indices_to_reroll, i)
+    end
+  end
+
+  self:roll_dice_by_indices(dice_indices_to_reroll)
+end
+
+function Game:logic()
+  if self.shaking.is_start_shaking then
+    if self:is_something_selected() then
+      self:move_selected_to_random_task_list()
+    else
+      self:move_all_to_random_task_list()
+    end
+  end
+
+  if self.shaking.is_shaking and self.fade:is_faded_in() and #self.random_task_queue > 0 then
+    local die = table.remove_elem(self.random_task_queue, #self.random_task_queue)
     die:randomize()
   end
 
@@ -136,37 +169,57 @@ function Game:logic()
   end
 
   if self.shaking.is_stop_shaking then
-    while #self.random_task_list > 0 do
-      table.remove(self.random_task_list):roll()
+    while #self.random_task_queue > 0 do
+      table.remove(self.random_task_queue):roll()
     end
 
-    self:reroll_dice()
-  end
-
-  if input.right or input.up then
-    if #self.dice < MAX_DICE_COUNT then
-      local moved_die = self:add_dice({ Die(self.die_size) })
-      for _, die in ipairs(moved_die) do
-        die:roll()
-      end
-    end
-  end
-
-  if input.left or input.down then
-    if #self.dice > 1 then
-      self:remove_die(math.random(#self.dice))
-    end
-  end
-
-  if input.a then
-    if self:all_animations_ended() then
-      local _, die_index = self:select_die()
-
-      if die_index then
-        self:reroll_die(die_index)
-      end
+    if self:is_something_selected() then
+      self:roll_selected_dice()
     else
-      self:shake_screen()
+      self:roll_all_dice()
+    end
+
+    self:stop_selection()
+  end
+
+  if self.cursor then
+    if input.left or input.down then
+      self:move_cursor_left()
+    end
+
+    if input.right or input.up then
+      self:move_cursor_right()
+    end
+
+    if input.a then
+      self:toggle_active_die()
+    end
+
+    if input.b then
+      self:stop_selection()
+    end
+  else
+    if input.left or input.down then
+      if #self.dice > 1 then
+        self:remove_die(math.random(#self.dice))
+      end
+    end
+
+    if input.right or input.up then
+      if #self.dice < MAX_DICE_COUNT then
+        local moved_die = self:add_dice({ Die(self.die_size) })
+        for _, die in ipairs(moved_die) do
+          die:roll()
+        end
+      end
+    end
+
+    if input.a then
+      if self:all_animations_ended() then
+        self:start_selection()
+      else
+        self:shake_screen()
+      end
     end
   end
 end
@@ -186,8 +239,15 @@ function Game:update()
 
   self.die_size = DIE_SIZES[#self.dice]
 
-  for _, die in ipairs(self.dice) do
+  for i, die in ipairs(self.dice) do
     die.size = self.die_size
+
+    if self.selected[i] then
+      die:highlight()
+    else
+      die:unhighlight()
+    end
+
     die:update()
   end
 
@@ -199,6 +259,11 @@ function Game:update()
       die:remove()
       table.remove_elem(self.remove_task_list, i)
     end
+  end
+
+  if self.cursor then
+    self.cursor:move_to(self.dice[self.active_die].die_sprite)
+    self.cursor:update()
   end
 
   if self.screen_shaking > 0 then
@@ -231,76 +296,68 @@ function Game:shake_screen()
   self.screen_shaking = 10
 end
 
----@return Die? die, integer? die_index
-function Game:select_die()
-  ---@type number?
-  local selected
-
-  if self.last_selected_die > #self.dice then
-    selected = 1
-  else
-    selected = self.last_selected_die
-  end
-
-  local cursor = Cursor(self.dice[selected].die_sprite)
-
-  while true do
-    coroutine.yield()
-    cursor:update()
-
-    for _, die in ipairs(self.dice) do
-      die:update()
+---@return boolean
+function Game:is_something_selected()
+  for i, _ in ipairs(self.dice) do
+    if self.selected[i] then
+      return true
     end
-
-    if input.left then
-      selected -= 1
-      
-      if selected < 1 then
-        selected = #self.dice
-      end
-    end
-
-    if input.right then
-      selected += 1
-
-      if selected > #self.dice then
-        selected = 1
-      end
-    end
-
-    if input.a then
-      break
-    end
-
-    if input.b then
-      selected = nil
-      break
-    end
-
-    cursor:move_to(self.dice[selected].die_sprite)
-
-    for i, die in ipairs(self.dice) do
-      if i == selected then
-        die:highlight()
-      else
-        die:unhighlight()
-      end
-    end
-  end
-
-  cursor:remove()
-
-  for _, die in ipairs(self.dice) do
-    die:unhighlight()
-  end
-
-  if selected then
-    self.last_selected_die = selected
-    return self.dice[selected], selected
-  else
-    return nil
   end
 end
+
+function Game:move_all_to_random_task_list()
+  self.random_task_queue = {}
+  self.random_task_queue = table.shallowcopy(self.dice)
+end
+
+function Game:move_selected_to_random_task_list()
+  self.random_task_queue = {}
+  for i, die in ipairs(self.dice) do
+    if self.selected[i] then
+      table.insert(self.random_task_queue, die)
+    end
+  end
+end
+
+function Game:start_selection()
+  self.active_die = self.prev_active_die
+
+  if self.active_die > #self.dice then
+    self.active_die = 1
+  end
+
+  self.cursor = Cursor(self.dice[self.active_die].die_sprite)
+  self.selected = {}
+end
+
+function Game:stop_selection()
+  self.selected = {}
+  
+  if self.cursor then
+    self.prev_active_die = self.active_die
+    self.cursor:remove()
+    self.cursor = nil
+  end
+end
+
+function Game:move_cursor_left()
+  self.active_die -= 1
+  if self.active_die < 1 then
+    self.active_die = #self.dice
+  end
+end
+
+function Game:move_cursor_right()
+  self.active_die += 1
+  if self.active_die > #self.dice then
+    self.active_die = 1
+  end
+end
+
+function Game:toggle_active_die()
+  self.selected[self.active_die] = not self.selected[self.active_die]
+end
+
 
 ---@param size number
 ---@param positions pd_point[]
