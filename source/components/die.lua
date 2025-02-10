@@ -62,9 +62,9 @@ end
 
 ---@param value die_value
 ---@param size number
----@return pd_image die
+---@return pd_image
 function Die.render(value, size)
-  local die = playdate.graphics.image.render(size, size, function()
+  return playdate.graphics.image.render(size, size, function()
     playdate.graphics.setColor(theme:foreground_color())
     playdate.graphics.fillRoundRect(0, 0, size, size, size / 5)
 
@@ -99,8 +99,6 @@ function Die.render(value, size)
       playdate.graphics.fillCircleAtPoint(size / 4 * 3, size / 2, radius)
     end
   end)
-
-  return die
 end
 
 function Die:save_cache()
