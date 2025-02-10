@@ -19,54 +19,28 @@ light_theme = {
       or error("Failed to load 'assets/images/patterns/forwardslash_light.png'"),
 }
 
-local themes = {
-  dark = dark_theme,
-  light = light_theme,
-}
-
 ---@class theme
----@field values theme_values
----@field version number
 theme = {
-  values = themes[config:read_theme()],
+  values = config.is_dark_theme and dark_theme or light_theme,
   version = 0,
 }
 
----@alias theme_name "dark" | "light"
-
----@param new_theme theme_name
-function theme:set(new_theme)
-  if new_theme == "dark" then
-    self.values = dark_theme
-  else
-    self.values = light_theme
-  end
-
-  self.version += 1
-end
-
-function theme:toggle()
-  if self.values == dark_theme then
-    self.values = light_theme
-  else
-    self.values = dark_theme
-  end
-
-  self.version += 1
-end
-
+---@return pd_color
 function theme:background_color()
   return self.values.bg
 end
 
+---@return pd_color
 function theme:foreground_color()
   return self.values.fg
 end
 
+---@return pd_image
 function theme:background_pattern()
   return self.values.bg_pattern
 end
 
+---@return pd_draw_mode
 function theme:text_draw_mode()
   if self.values.fg == playdate.graphics.kColorBlack then
     return playdate.graphics.kDrawModeFillBlack
@@ -75,6 +49,13 @@ function theme:text_draw_mode()
   end
 end
 
+---@param is_dark_theme boolean
+function theme:set_dark_theme(is_dark_theme)
+  self.values = is_dark_theme and dark_theme or light_theme
+  self.version = self.version + 1
+end
+
+---@return boolean
 function theme:is_dark_theme()
   return self.values == dark_theme
 end

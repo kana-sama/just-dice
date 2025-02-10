@@ -41,13 +41,29 @@ DIE_SIZES = {
 }
 
 playdate.display.setRefreshRate(50.0)
+
 playdate.startAccelerometer()
 
 playdate.getSystemMenu():addOptionsMenuItem(
-  "Theme", { "dark", "light" },
-  config:read_theme(), function(new_theme)
-    theme:set(new_theme)
-    config:write_theme(new_theme)
+  "theme", { "dark", "light" }, config.is_dark_theme and "dark" or "light",
+  function(new_theme)
+    local is_dark_theme = new_theme == "dark"
+    theme:set_dark_theme(is_dark_theme)
+    config.set_dark_theme(is_dark_theme)
+  end
+)
+
+playdate.getSystemMenu():addCheckmarkMenuItem(
+  "framerate", config.framerate,
+  function(framerate)
+    config.set_framerate(framerate)
+  end
+)
+
+playdate.getSystemMenu():addCheckmarkMenuItem(
+  "pattern", config.pattern,
+  function(pattern)
+    config.set_pattern(pattern)
   end
 )
 
@@ -59,6 +75,10 @@ local game = Game()
 
 function playdate.update()
   game:update()
+
   playdate.graphics.sprite:update()
-  -- playdate.drawFPS(0, 0)
+
+  if config.framerate then
+    playdate.drawFPS(0, 0)
+  end
 end

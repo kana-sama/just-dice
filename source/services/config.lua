@@ -1,20 +1,31 @@
----@class config
-config = {}
-
----@return theme_name
-function config:read_theme()
-  ---@type table | nil
-  local value = playdate.datastore.read("config")
-
-  if value and value.theme and (value.theme == "dark" or value.theme == "light") then
-    return value.theme
-  else
-    return "dark"
-  end
+---@generic T
+---@param value T | nil
+---@param default T
+---@return T
+local function with_default(value, default)
+  return value == nil and default or value
 end
 
-function config:write_theme(theme)
-  local value = playdate.datastore.read("config") or {}
-  value.theme = theme
-  playdate.datastore.write(value, "config")
+---@class config
+config = playdate.datastore.read("config") or {}
+config.is_dark_theme = with_default(config.is_dark_theme, false)
+config.framerate = with_default(config.framerate, false)
+config.pattern = with_default(config.pattern, true)
+
+---@param is_dark_theme boolean
+function config.set_dark_theme(is_dark_theme)
+  config.is_dark_theme = is_dark_theme
+  playdate.datastore.write(config, "config")
+end
+
+---@param framerate boolean
+function config.set_framerate(framerate)
+  config.framerate = framerate
+  playdate.datastore.write(config, "config")
+end
+
+---@param pattern boolean
+function config.set_pattern(pattern)
+  config.pattern = pattern
+  playdate.datastore.write(config, "config")
 end
