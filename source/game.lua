@@ -70,6 +70,20 @@ function Game:add_dice(new_dice)
   return moved_dice
 end
 
+function Game:remove_die()
+  local die = table.remove_elem(self.dice, math.random(#self.dice))
+  die:remove()
+
+  local positions = {}
+  for i, die in ipairs(self.dice) do
+    positions[i] = die.position
+  end
+
+  if not valid_positions(DIE_SIZES[#self.dice], positions) then
+    self:reroll_dice()
+  end
+end
+
 function Game:reroll_dice()
   local dice = self.dice
   self.dice = {}
@@ -93,8 +107,7 @@ function Game:update()
     end
 
     if self.shaking.is_shaking and self.fade:is_faded() and #self.random_task_list > 0 then
-      ---@type Die
-      local die = table.remove(self.random_task_list)
+      local die = table.remove_elem(self.random_task_list, 1)
       die:randomize()
     end
 
@@ -123,10 +136,7 @@ function Game:update()
 
     if playdate.buttonJustPressed(playdate.kButtonLeft) or playdate.buttonJustPressed(playdate.kButtonDown) then
       if #self.dice > 1 then
-        local die = table.remove_elem(self.dice, math.random(#self.dice))
-        die:remove()
-
-        self:reroll_dice()
+        self:remove_die()
       end
     end
   end
@@ -140,12 +150,36 @@ function Game:update()
   end
 end
 
----@param die_size number
----@param other pd_point[]
+---@param size number
+---@param positions pd_point[]
+---@return boolean
+function valid_positions(size, positions)
+  for _, positions in ipairs(positions) do
+    if positions.x < size * 0.7 or positions.x > playdate.display.getWidth() - size * 0.7 then
+      return false
+    end
+
+    if positions.y < size * 0.7 or positions.y > playdate.display.getHeight() - size * 0.7 then
+      return false
+    end
+
+    for _, other_position in ipairs(positions) do
+      if other_position:distanceToPoint(positions) < size * 1.41 then
+        return false
+      end
+    end
+  end
+
+  return true
+end
+
+---@param size number
+---@param positions pd_point[]
 ---@return pd_point?
-function find_free_place_for_die(die_size, other)
+function find_free_place_for_die(size, positions)
   local position = playdate.geometry.point.new(0, 0)
   local attempts = 0
+
   repeat
     if attempts > 20 then
       return nil
@@ -153,11 +187,11 @@ function find_free_place_for_die(die_size, other)
 
     local overlaps = false
 
-    position.x = math.random(die_size, math.floor(playdate.display.getWidth() - die_size * 1.5))
-    position.y = math.random(die_size, math.floor(playdate.display.getHeight() - die_size * 1.5))
+    position.x = math.random(size * 0.7, math.floor(playdate.display.getWidth() - size * 0.7))
+    position.y = math.random(size * 0.7, math.floor(playdate.display.getHeight() - size * 0.7))
 
-    for _, other_position in ipairs(other) do
-      if other_position:distanceToPoint(position) < die_size * 1.41 then
+    for _, other_position in ipairs(positions) do
+      if other_position:distanceToPoint(position) < size * 1.41 then
         overlaps = true
         break
       end
