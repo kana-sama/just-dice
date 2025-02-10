@@ -22,17 +22,14 @@ end
 
 ---@return pd_image
 function Fade:render()
-  local image = playdate.graphics.image.new(playdate.display.getWidth(), playdate.display.getHeight())
-  playdate.graphics.pushContext(image)
-  playdate.graphics.setColor(theme:foreground_color())
-  playdate.graphics.fillCircleAtPoint(
-    playdate.display.getWidth() / 2,
-    playdate.display.getHeight() / 2,
-    self.progress:progress() * 400
-  )
-  playdate.graphics.popContext()
-
-  return image
+  return playdate.graphics.image.render(playdate.display.getWidth(), playdate.display.getHeight(), function()
+    playdate.graphics.setColor(theme:foreground_color())
+    playdate.graphics.fillCircleAtPoint(
+      playdate.display.getWidth() / 2,
+      playdate.display.getHeight() / 2,
+      self.progress:progress() * 400
+    )
+  end)
 end
 
 function Fade:update()

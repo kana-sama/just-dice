@@ -9,6 +9,8 @@ import "utils/lerp"
 import "utils/vector3d"
 import "utils/progress"
 import "utils/ring_buffer"
+import "utils/list"
+import "utils/image"
 
 import "services/shaking"
 import "services/config"
@@ -23,10 +25,11 @@ import "components/die"
 import "game"
 
 Z_INDICES = {
-  background = -1,
-  die = 1,
-  lock = 2,
-  fade = 10,
+  background = 0,
+  die_shadow = 1,
+  die = 2,
+  lock = 3,
+  fade = 4,
 }
 
 DIE_SIZES = {
@@ -58,5 +61,5 @@ local game = Game()
 function playdate.update()
   game:update()
   playdate.graphics.sprite:update()
-  -- playdate.drawFPS(0, 0)
+  playdate.drawFPS(0, 0)
 end

@@ -62,49 +62,45 @@ end
 
 ---@param value die_value
 ---@param size number
----@return pd_image
+---@return pd_image die
 function Die.render(value, size)
-  local image = playdate.graphics.image.new(size, size)
+  local die = playdate.graphics.image.render(size, size, function()
+    playdate.graphics.setColor(theme:foreground_color())
+    playdate.graphics.fillRoundRect(0, 0, size, size, size / 5)
 
-  playdate.graphics.pushContext(image)
+    playdate.graphics.setColor(theme:background_color())
+    local radius = size * 0.1
+    if value == 1 then
+      playdate.graphics.fillCircleAtPoint(size / 2, size / 2, radius)
+    elseif value == 2 then
+      playdate.graphics.fillCircleAtPoint(size / 4, size / 4, radius)
+      playdate.graphics.fillCircleAtPoint(size / 4 * 3, size / 4 * 3, radius)
+    elseif value == 3 then
+      playdate.graphics.fillCircleAtPoint(size / 4, size / 4, radius)
+      playdate.graphics.fillCircleAtPoint(size / 2, size / 2, radius)
+      playdate.graphics.fillCircleAtPoint(size / 4 * 3, size / 4 * 3, radius)
+    elseif value == 4 then
+      playdate.graphics.fillCircleAtPoint(size / 4, size / 4, radius)
+      playdate.graphics.fillCircleAtPoint(size / 4 * 3, size / 4, radius)
+      playdate.graphics.fillCircleAtPoint(size / 4, size / 4 * 3, radius)
+      playdate.graphics.fillCircleAtPoint(size / 4 * 3, size / 4 * 3, radius)
+    elseif value == 5 then
+      playdate.graphics.fillCircleAtPoint(size / 4, size / 4, radius)
+      playdate.graphics.fillCircleAtPoint(size / 4 * 3, size / 4, radius)
+      playdate.graphics.fillCircleAtPoint(size / 4, size / 4 * 3, radius)
+      playdate.graphics.fillCircleAtPoint(size / 4 * 3, size / 4 * 3, radius)
+      playdate.graphics.fillCircleAtPoint(size / 2, size / 2, radius)
+    elseif value == 6 then
+      playdate.graphics.fillCircleAtPoint(size / 4, size / 4, radius)
+      playdate.graphics.fillCircleAtPoint(size / 4 * 3, size / 4, radius)
+      playdate.graphics.fillCircleAtPoint(size / 4, size / 4 * 3, radius)
+      playdate.graphics.fillCircleAtPoint(size / 4 * 3, size / 4 * 3, radius)
+      playdate.graphics.fillCircleAtPoint(size / 4, size / 2, radius)
+      playdate.graphics.fillCircleAtPoint(size / 4 * 3, size / 2, radius)
+    end
+  end)
 
-  playdate.graphics.setColor(theme:foreground_color())
-  playdate.graphics.fillRoundRect(0, 0, size, size, size / 5)
-
-  playdate.graphics.setColor(theme:background_color())
-  local radius = size * 0.1
-  if value == 1 then
-    playdate.graphics.fillCircleAtPoint(size / 2, size / 2, radius)
-  elseif value == 2 then
-    playdate.graphics.fillCircleAtPoint(size / 4, size / 4, radius)
-    playdate.graphics.fillCircleAtPoint(size / 4 * 3, size / 4 * 3, radius)
-  elseif value == 3 then
-    playdate.graphics.fillCircleAtPoint(size / 4, size / 4, radius)
-    playdate.graphics.fillCircleAtPoint(size / 2, size / 2, radius)
-    playdate.graphics.fillCircleAtPoint(size / 4 * 3, size / 4 * 3, radius)
-  elseif value == 4 then
-    playdate.graphics.fillCircleAtPoint(size / 4, size / 4, radius)
-    playdate.graphics.fillCircleAtPoint(size / 4 * 3, size / 4, radius)
-    playdate.graphics.fillCircleAtPoint(size / 4, size / 4 * 3, radius)
-    playdate.graphics.fillCircleAtPoint(size / 4 * 3, size / 4 * 3, radius)
-  elseif value == 5 then
-    playdate.graphics.fillCircleAtPoint(size / 4, size / 4, radius)
-    playdate.graphics.fillCircleAtPoint(size / 4 * 3, size / 4, radius)
-    playdate.graphics.fillCircleAtPoint(size / 4, size / 4 * 3, radius)
-    playdate.graphics.fillCircleAtPoint(size / 4 * 3, size / 4 * 3, radius)
-    playdate.graphics.fillCircleAtPoint(size / 2, size / 2, radius)
-  elseif value == 6 then
-    playdate.graphics.fillCircleAtPoint(size / 4, size / 4, radius)
-    playdate.graphics.fillCircleAtPoint(size / 4 * 3, size / 4, radius)
-    playdate.graphics.fillCircleAtPoint(size / 4, size / 4 * 3, radius)
-    playdate.graphics.fillCircleAtPoint(size / 4 * 3, size / 4 * 3, radius)
-    playdate.graphics.fillCircleAtPoint(size / 4, size / 2, radius)
-    playdate.graphics.fillCircleAtPoint(size / 4 * 3, size / 2, radius)
-  end
-
-  playdate.graphics.popContext()
-
-  return image
+  return die
 end
 
 function Die:save_cache()
@@ -126,8 +122,8 @@ end
 
 function Die:update()
   if self:is_cache_invalidated() then
-    local image = Die.render(self.value, self.size):rotatedImage(self.angle)
-    self.sprite:setImage(image)
+    local image= Die.render(self.value, self.size)
+    self.sprite:setImage(image:rotatedImage(self.angle))
     self:save_cache()
   end
 

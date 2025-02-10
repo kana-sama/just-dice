@@ -33,39 +33,32 @@ end
 ---@return pd_image
 function stat:render()
   local LINE_SIZE <const> = 35
-  local START_Y = 25
+  local START_Y <const> = 25
 
-  local image = playdate.graphics.image.new(400, 240)
-
-  playdate.graphics.pushContext(image)
-
-  playdate.graphics.setColor(theme:background_color())
-  playdate.graphics.setDitherPattern(0.05)
-  playdate.graphics.fillRect(0, 0, 400, 240)
-
-  playdate.graphics.setFont(stat_font)
-  for i = 1, 6 do
-    local line_y = START_Y + LINE_SIZE * (i - 1)
-    local rolls = shorten(self.rolls[i])
-    local perc = string.format("%.f%%", rolls / self:total() * 100)
-
-    Die.render(i, 20):draw(30, line_y)
-
-    playdate.graphics.pushContext()
-    playdate.graphics.setImageDrawMode(theme:text_draw_mode())
-    playdate.graphics.drawText(rolls, 75, line_y + 4, 50, 20, playdate.graphics.kAlignCenter)
-    playdate.graphics.drawText(perc, 140, line_y + 4, 30, 20, playdate.graphics.kAlignRight)
-    playdate.graphics.popContext()
-
-    if i < 6 then
-      playdate.graphics.setColor(theme:foreground_color())
-      playdate.graphics.fillRect(20, line_y + LINE_SIZE - 8, 160, 1)
+  return playdate.graphics.image.render(playdate.display.getWidth(), playdate.display.getHeight(), function()playdate.graphics.setColor(theme:background_color())
+    playdate.graphics.setDitherPattern(0.05)
+    playdate.graphics.fillRect(0, 0, 400, 240)
+  
+    playdate.graphics.setFont(stat_font)
+    for i = 1, 6 do
+      local line_y = START_Y + LINE_SIZE * (i - 1)
+      local rolls = shorten(self.rolls[i])
+      local perc = string.format("%.f%%", rolls / self:total() * 100)
+  
+      Die.render(i, 20):draw(30, line_y)
+  
+      playdate.graphics.pushContext()
+      playdate.graphics.setImageDrawMode(theme:text_draw_mode())
+      playdate.graphics.drawText(rolls, 75, line_y + 4, 50, 20, playdate.graphics.kAlignCenter)
+      playdate.graphics.drawText(perc, 140, line_y + 4, 30, 20, playdate.graphics.kAlignRight)
+      playdate.graphics.popContext()
+  
+      if i < 6 then
+        playdate.graphics.setColor(theme:foreground_color())
+        playdate.graphics.fillRect(20, line_y + LINE_SIZE - 8, 160, 1)
+      end
     end
-  end
-
-  playdate.graphics.popContext()
-
-  return image
+  end)
 end
 
 

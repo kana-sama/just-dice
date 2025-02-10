@@ -49,7 +49,7 @@ function Game:add_dice(new_dice)
   end
 
   while #positions < #self.dice do
-    local position = find_free_place_for_die(self.die_size, positions)
+    local position = find_free_place_for_die(DIE_SIZES[#self.dice], positions)
     if position then
       table.insert(positions, position)
     else
@@ -78,13 +78,6 @@ function Game:reroll_dice()
   for _, die in ipairs(self.dice) do
     die:roll()
   end
-end
-
-function Game:remove_random_die()
-  ---@type Die
-  local die = table.remove(self.dice, math.random(#self.dice))
-
-  die:remove()
 end
 
 function Game:update()
@@ -121,9 +114,7 @@ function Game:update()
 
     if playdate.buttonJustPressed(playdate.kButtonRight) or playdate.buttonJustPressed(playdate.kButtonUp) then
       if #self.dice < MAX_DICE_COUNT then
-        self.die_size = DIE_SIZES[#self.dice + 1]
-        
-        local moved_die = self:add_dice({ Die() })
+        local moved_die = self:add_dice({ Die(self.die_size) })
         for _, die in ipairs(moved_die) do
           die:roll()
         end
@@ -132,9 +123,9 @@ function Game:update()
 
     if playdate.buttonJustPressed(playdate.kButtonLeft) or playdate.buttonJustPressed(playdate.kButtonDown) then
       if #self.dice > 1 then
-        self.die_size = DIE_SIZES[#self.dice - 1]
-        
-        self:remove_random_die()
+        local die = table.remove_elem(self.dice, math.random(#self.dice))
+        die:remove()
+
         self:reroll_dice()
       end
     end

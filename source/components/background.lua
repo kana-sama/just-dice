@@ -15,16 +15,12 @@ end
 ---@param theme theme_values
 ---@return pd_image
 function Background.render(theme)
-  local image = playdate.graphics.image.new(playdate.display.getWidth(), playdate.display.getHeight())
-
-  playdate.graphics.pushContext(image)
-  playdate.graphics.setBackgroundColor(playdate.graphics.kColorBlack)
-  playdate.graphics.clear()
-  playdate.graphics.setPattern(theme.bg_pattern)
-  playdate.graphics.fillRoundRect(0, 0, playdate.display.getWidth(), playdate.display.getHeight(), 15)
-  playdate.graphics.popContext()
-
-  return image
+  return playdate.graphics.image.render(playdate.display.getWidth(), playdate.display.getHeight(), function()
+    playdate.graphics.setBackgroundColor(playdate.graphics.kColorBlack)
+    playdate.graphics.clear()
+    playdate.graphics.setPattern(theme.bg_pattern)
+    playdate.graphics.fillRoundRect(0, 0, playdate.display.getWidth(), playdate.display.getHeight(), 15)
+  end)
 end
 
 function Background:update()
