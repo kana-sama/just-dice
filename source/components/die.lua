@@ -23,6 +23,7 @@ function Die:new(size)
   self.position = playdate.geometry.point.new(0, 0)
 
   self.roll_animation = playdate.graphics.animator.new(500, 0, 1, playdate.easingFunctions.outCirc)
+  self.remove_animation = playdate.graphics.animator.disabled(0)
 
   self.roll_player = playdate.sound.sampleplayer.new(roll_effect)
   self.roll_player:setRate(0.8 + math.random() * 0.4)
@@ -125,10 +126,27 @@ function Die:update()
     self:save_cache()
   end
 
-  self.sprite:moveTo(
-    self.position.x * self.roll_animation:currentValue(),
-    self.position.y * self.roll_animation:currentValue()
-  )
+  local start_point = playdate.geometry.point.new(-self.size, -self.size)
+  local target_point = self.position
+  local finish_point = playdate.geometry.point.new(playdate.display.getWidth() + self.size, playdate.display.getHeight() + self.size)
+
+  local x, y = start_point
+    :lerp(target_point, self.roll_animation:currentValue() --[[@as number]])
+    :lerp(finish_point, self.remove_animation:currentValue() --[[@as number]])
+    :unpack()
+
+  self.sprite:moveTo(x, y)
+end
+
+function Die:start_removing()
+  self.remove_animation = playdate.graphics.animator.new(100, 0, 1, playdate.easingFunctions.inOutCirc)
+  self.remove_animation:reset()
+  self:play_roll_effect()
+end
+
+---@return boolean
+function Die:is_ready_to_remove()
+  return self.remove_animation:ended()
 end
 
 function Die:remove()

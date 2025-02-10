@@ -12,6 +12,9 @@ function Game:new()
   self.dice = {}
 
   ---@type Die[]
+  self.remove_task_list = {}
+
+  ---@type Die[]
   self.random_task_list = {}
 
   self.die_size = DIE_SIZES[INITIAL_DICE_COUNT]
@@ -72,7 +75,8 @@ end
 
 function Game:remove_die()
   local die = table.remove_elem(self.dice, math.random(#self.dice))
-  die:remove()
+  table.insert(self.remove_task_list, die)
+  die:start_removing()
 
   local positions = {}
   for i, die in ipairs(self.dice) do
@@ -144,9 +148,20 @@ function Game:update()
   self.fade:set(self.lock:is_unlocked() and self.shaking.is_shaking)
 
   self.die_size = DIE_SIZES[#self.dice]
+
   for _, die in ipairs(self.dice) do
     die.size = self.die_size
     die:update()
+  end
+
+  for i, die in ipairs(self.remove_task_list) do
+    die.size = self.die_size
+    die:update()
+
+    if die:is_ready_to_remove() then
+      die:remove()
+      table.remove_elem(self.remove_task_list, i)
+    end
   end
 end
 

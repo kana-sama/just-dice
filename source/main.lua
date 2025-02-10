@@ -11,6 +11,7 @@ import "utils/progress"
 import "utils/ring_buffer"
 import "utils/list"
 import "utils/image"
+import "utils/disabled_animator"
 
 import "services/shaking"
 import "services/config"
