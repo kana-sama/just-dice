@@ -14,6 +14,7 @@ import "utils/list"
 import "utils/image"
 import "utils/disabled_animator"
 import "utils/coroutine"
+import "utils/rect"
 
 import "services/shaking"
 import "services/config"
@@ -80,7 +81,14 @@ end
 
 local game = Game()
 
+if playdate.isSimulator then
+  function sample(name, fn)
+    fn()
+  end
+end
+
 function playdate.update()
+sample("update", function()
   input:update()
   game:update()
 
@@ -89,4 +97,5 @@ function playdate.update()
   if config.framerate then
     playdate.drawFPS(0, 0)
   end
+end)
 end

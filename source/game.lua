@@ -1,4 +1,4 @@
-local INITIAL_DICE_COUNT <const> = 3
+local INITIAL_DICE_COUNT <const> = 6
 local MAX_DICE_COUNT <const> = 6
 
 local find_free_place_for_die, is_valid_positions
@@ -136,6 +136,22 @@ function Game:roll_all_dice()
   self:roll_dice_by_indices(dice_indices_to_reroll)
 end
 
+function Game:play_selected_dice_shake_effect()
+  local is_something_selected = self:is_something_selected()
+
+  for i, die in ipairs(self.dice) do
+    if not is_something_selected or is_something_selected and self.selected[i] then
+      die:play_shake_effect()
+    end
+  end
+end
+
+function Game:play_all_dice_shake_effect()
+  for _, die in ipairs(self.dice) do
+    die:play_shake_effect()
+  end
+end
+
 function Game:roll_selected_dice()
   local dice_indices_to_reroll = {}
 
@@ -163,8 +179,10 @@ function Game:logic()
   end
 
   if self.shaking.is_shaking and self.shaking.is_extremum then
-    for _, die in ipairs(self.dice) do
-      die:play_shake_effect()
+    if self:is_something_selected() then
+      self:play_selected_dice_shake_effect()
+    else
+      self:play_all_dice_shake_effect()
     end
   end
 
@@ -239,6 +257,7 @@ function Game:update()
 
   self.die_size = DIE_SIZES[#self.dice]
 
+sample("Die:update", function()
   for i, die in ipairs(self.dice) do
     die.size = self.die_size
 
@@ -250,6 +269,7 @@ function Game:update()
 
     die:update()
   end
+end)
 
   for i, die in ipairs(self.remove_task_list) do
     die.size = self.die_size
@@ -262,7 +282,7 @@ function Game:update()
   end
 
   if self.cursor then
-    self.cursor:move_to(self.dice[self.active_die].die_sprite)
+    self.cursor:move_to(self.dice[self.active_die].bounding_rect)
     self.cursor:update()
   end
 
@@ -303,6 +323,8 @@ function Game:is_something_selected()
       return true
     end
   end
+
+  return false
 end
 
 function Game:move_all_to_random_task_list()
@@ -326,7 +348,7 @@ function Game:start_selection()
     self.active_die = 1
   end
 
-  self.cursor = Cursor(self.dice[self.active_die].die_sprite)
+  self.cursor = Cursor(self.dice[self.active_die].bounding_rect)
   self.selected = {}
 end
 

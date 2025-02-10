@@ -6,7 +6,9 @@ local shake_effect = playdate.sound.sample.new("assets/audio/shake")
 
 local ROLL_ANIMATION_DURATION <const> = 500
 local REMOVE_ANIMATION_DURATION <const> = 300
-local HIGHLIGHT_ANIMATION_DURATION <const> = 20
+local HIGHLIGHT_ANIMATION_DURATION <const> = 15
+local HIGHLIGHT_HIGHT <const> = 4
+local FLOATING_OFFSET <const> = 3
 
 
 ---@alias die_value 1 | 2 | 3 | 4 | 5 | 6
@@ -16,6 +18,10 @@ local HIGHLIGHT_ANIMATION_DURATION <const> = 20
 ---@field drawn_cache? { theme_version: number, value: die_value, angle: number, size: number }
 ---@overload fun(size: number): Die
 Die = Object:extend()
+
+Die.floating_animation =  playdate.graphics.animator.new(700, -FLOATING_OFFSET/2, FLOATING_OFFSET/2, playdate.easingFunctions.inOutQuad)
+Die.floating_animation.reverses = true
+Die.floating_animation.repeatCount = -1
 
 ---@param self Die
 ---@param size number
@@ -44,6 +50,8 @@ function Die:new(size)
 
   self.highlighting = Progress(HIGHLIGHT_ANIMATION_DURATION)
   self.highlighting:backward()
+
+  self.bounding_rect = self.die_sprite:getBoundsRect():clone()
 
   self:randomize()
 end
@@ -158,7 +166,10 @@ function Die:update()
     :lerp(finish_point, self.remove_animation:currentValue() --[[@as number]])
     :unpack()
 
-  local highlighting_offset = self.highlighting:progress() * 3
+  self.die_sprite:moveTo(x, y)
+  self.bounding_rect = self.die_sprite:getBoundsRect():clone()
+  
+  local highlighting_offset = self.highlighting:progress() * (HIGHLIGHT_HIGHT + self.floating_animation:currentValue())
 
   self.die_sprite:moveTo(x, y - highlighting_offset)
   self.shadow_sprite:moveTo(x + highlighting_offset / 2, y + highlighting_offset)
