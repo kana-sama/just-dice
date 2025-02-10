@@ -29,9 +29,16 @@ function Die:new(size)
   self.roll_player:setRate(0.8 + math.random() * 0.4)
   self.roll_player:setVolume(0.6 + math.random() * 0.4)
 
-  self.sprite = playdate.graphics.sprite.new()
-  self.sprite:setZIndex(Z_INDICES.die)
-  self.sprite:add()
+  self.die_sprite = playdate.graphics.sprite.new()
+  self.die_sprite:setZIndex(Z_INDICES.die)
+  self.die_sprite:add()
+
+  self.shadow_sprite = playdate.graphics.sprite.new()
+  self.shadow_sprite:setZIndex(Z_INDICES.die_shadow)
+  self.shadow_sprite:add()
+
+  self.highlighting = Progress(20)
+  self.highlighting:backward()
 
   self:randomize()
 end
@@ -63,9 +70,9 @@ end
 
 ---@param value die_value
 ---@param size number
----@return pd_image
+---@return pd_image die, pd_image shadow
 function Die.render(value, size)
-  return playdate.graphics.image.render(size, size, function()
+  local die = playdate.graphics.image.render(size, size, function()
     playdate.graphics.setColor(theme:foreground_color())
     playdate.graphics.fillRoundRect(0, 0, size, size, size / 5)
 
@@ -100,6 +107,14 @@ function Die.render(value, size)
       playdate.graphics.fillCircleAtPoint(size / 4 * 3, size / 2, radius)
     end
   end)
+
+  local shadow = playdate.graphics.image.render(size, size, function()
+    playdate.graphics.setColor(theme:foreground_color())
+    playdate.graphics.setDitherPattern(0.5)
+    playdate.graphics.fillRoundRect(0, 0, size, size, size / 5)
+  end)
+
+  return die, shadow
 end
 
 function Die:save_cache()
@@ -120,9 +135,12 @@ function Die:is_cache_invalidated()
 end
 
 function Die:update()
+  self.highlighting:update()
+
   if self:is_cache_invalidated() then
-    local image= Die.render(self.value, self.size)
-    self.sprite:setImage(image:rotatedImage(self.angle))
+    local die_image, shadow_image = Die.render(self.value, self.size)
+    self.die_sprite:setImage(die_image:rotatedImage(self.angle))
+    self.shadow_sprite:setImage(shadow_image:rotatedImage(self.angle))
     self:save_cache()
   end
 
@@ -135,7 +153,10 @@ function Die:update()
     :lerp(finish_point, self.remove_animation:currentValue() --[[@as number]])
     :unpack()
 
-  self.sprite:moveTo(x, y)
+  local highlighting_offset = self.highlighting:progress() * 3
+
+  self.die_sprite:moveTo(x, y - highlighting_offset)
+  self.shadow_sprite:moveTo(x + highlighting_offset / 2, y + highlighting_offset)
 end
 
 function Die:start_removing()
@@ -149,10 +170,19 @@ function Die:is_ready_to_remove()
   return self.remove_animation:ended()
 end
 
-function Die:remove()
-  self.sprite:remove()
-end
-
 function Die:is_animating()
   return not self.roll_animation:ended() or not self.remove_animation:ended()
+end
+
+function Die:highlight()
+  self.highlighting:forward()
+end
+
+function Die:unhighlight()
+  self.highlighting:backward()
+end
+
+function Die:remove()
+  self.die_sprite:remove()
+  self.shadow_sprite:remove()
 end

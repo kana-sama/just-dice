@@ -242,7 +242,7 @@ function Game:select_die()
     selected = self.last_selected_die
   end
 
-  local cursor = Cursor(self.dice[selected].sprite)
+  local cursor = Cursor(self.dice[selected].die_sprite)
 
   while true do
     coroutine.yield()
@@ -277,7 +277,15 @@ function Game:select_die()
       break
     end
 
-    cursor:move_to(self.dice[selected].sprite)
+    cursor:move_to(self.dice[selected].die_sprite)
+
+    for i, die in ipairs(self.dice) do
+      if i == selected then
+        die:highlight()
+      else
+        die:unhighlight()
+      end
+    end
   end
 
   cursor:remove()

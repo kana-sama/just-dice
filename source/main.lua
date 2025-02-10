@@ -31,10 +31,11 @@ import "game"
 
 Z_INDICES = {
   background = 0,
-  die = 1,
-  cursor = 2,
-  lock = 3,
-  fade = 4,
+  die_shadow = 1,
+  die = 2,
+  cursor = 3,
+  lock = 4,
+  fade = 5,
 }
 
 DIE_SIZES = {
