@@ -178,7 +178,8 @@ function Game:update()
   self.background:update()
 
   if self.lock:is_unlocked() then
-    coroutine.resume(self.logic_co)
+    local ok, err = coroutine.resume(self.logic_co)
+    if not ok then error(err) end
   end
 
   self.fade:set(self.lock:is_unlocked() and self.shaking.is_shaking)

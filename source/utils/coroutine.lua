@@ -6,7 +6,9 @@ function coroutine.forever(action)
       local co = coroutine.create(action)
       
       repeat
-        coroutine.resume(co)
+        local ok, err = coroutine.resume(co)
+        if not ok then error(err) end
+
         coroutine.yield()
       until coroutine.status(co) == "dead"
     end
