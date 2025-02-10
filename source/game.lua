@@ -1,7 +1,7 @@
 local INITIAL_DICE_COUNT <const> = 3
 local MAX_DICE_COUNT <const> = 6
 
-local find_free_place_for_die
+local find_free_place_for_die, is_valid_positions
 
 ---@class Game
 ---@overload fun(): Game
@@ -83,7 +83,7 @@ function Game:remove_die()
     positions[i] = die.position
   end
 
-  if not valid_positions(DIE_SIZES[#self.dice], positions) then
+  if not is_valid_positions(DIE_SIZES[#self.dice], positions) then
     self:reroll_dice()
   end
 end
@@ -168,7 +168,7 @@ end
 ---@param size number
 ---@param positions pd_point[]
 ---@return boolean
-function valid_positions(size, positions)
+function is_valid_positions(size, positions)
   for _, positions in ipairs(positions) do
     if positions.x < size * 0.7 or positions.x > playdate.display.getWidth() - size * 0.7 then
       return false
