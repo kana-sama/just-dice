@@ -22,4 +22,7 @@
     "redefined-local"
   ],
   "Lua.diagnostics.libraryFiles": "Disable",
+  "Lua.doc.privateName": [
+    "_*"
+  ],
 }

@@ -8,28 +8,33 @@ import "utils/classic"
 import "utils/lerp"
 import "utils/vector3d"
 import "utils/progress"
+import "utils/smooth"
 import "utils/ring_buffer"
 import "utils/list"
 import "utils/image"
 import "utils/disabled_animator"
+import "utils/coroutine"
 
 import "services/shaking"
 import "services/config"
 import "services/stat"
 import "services/theme"
+import "services/input"
 
 import "components/background"
 import "components/fade"
 import "components/lock"
 import "components/die"
+import "components/cursor"
 
 import "game"
 
 Z_INDICES = {
   background = 0,
   die = 1,
-  lock = 2,
-  fade = 3,
+  cursor = 2,
+  lock = 3,
+  fade = 4,
 }
 
 DIE_SIZES = {
@@ -75,6 +80,7 @@ end
 local game = Game()
 
 function playdate.update()
+  input:update()
   game:update()
 
   playdate.graphics.sprite:update()

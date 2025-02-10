@@ -41,6 +41,11 @@ function Fade:update()
 end
 
 ---@return boolean
-function Fade:is_faded()
+function Fade:is_faded_in()
   return self.progress.current_value == self.progress.duration
+end
+
+---@return boolean
+function Fade:is_faded_out()
+  return self.progress.current_value == 0
 end

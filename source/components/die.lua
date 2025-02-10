@@ -152,3 +152,7 @@ end
 function Die:remove()
   self.sprite:remove()
 end
+
+function Die:is_animating()
+  return not self.roll_animation:ended() or not self.remove_animation:ended()
+end

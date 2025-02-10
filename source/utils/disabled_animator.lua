@@ -25,3 +25,8 @@ end
 function DisabledAnimator:currentValue()
   return self.startValue
 end
+
+---@return boolean
+function DisabledAnimator:ended()
+  return true
+end
