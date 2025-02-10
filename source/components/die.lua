@@ -4,6 +4,11 @@ local roll_effect = playdate.sound.sample.new("assets/audio/roll")
 local shake_effect = playdate.sound.sample.new("assets/audio/shake")
     or error("Failed to load 'assets/audio/shake.wav'")
 
+local ROLL_ANIMATION_DURATION <const> = 500
+local REMOVE_ANIMATION_DURATION <const> = 300
+local HIGHLIGHT_ANIMATION_DURATION <const> = 20
+
+
 ---@alias die_value 1 | 2 | 3 | 4 | 5 | 6
 
 ---@class Die
@@ -22,7 +27,7 @@ function Die:new(size)
   self.size = size
   self.position = playdate.geometry.point.new(0, 0)
 
-  self.roll_animation = playdate.graphics.animator.new(500, 0, 1, playdate.easingFunctions.outCirc)
+  self.roll_animation = playdate.graphics.animator.new(ROLL_ANIMATION_DURATION, 0, 1, playdate.easingFunctions.outCirc)
   self.remove_animation = playdate.graphics.animator.disabled(0)
 
   self.roll_player = playdate.sound.sampleplayer.new(roll_effect)
@@ -37,7 +42,7 @@ function Die:new(size)
   self.shadow_sprite:setZIndex(Z_INDICES.die_shadow)
   self.shadow_sprite:add()
 
-  self.highlighting = Progress(20)
+  self.highlighting = Progress(HIGHLIGHT_ANIMATION_DURATION)
   self.highlighting:backward()
 
   self:randomize()
@@ -160,8 +165,7 @@ function Die:update()
 end
 
 function Die:start_removing()
-  self.remove_animation = playdate.graphics.animator.new(100, 0, 1, playdate.easingFunctions.inOutCirc)
-  self.remove_animation:reset()
+  self.remove_animation = playdate.graphics.animator.new(REMOVE_ANIMATION_DURATION, 0, 1, playdate.easingFunctions.inOutCirc)
   self:play_roll_effect()
 end
 
