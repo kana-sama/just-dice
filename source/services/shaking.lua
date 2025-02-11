@@ -29,8 +29,8 @@ function Shaking:update()
 
   local average = #self.history:average()
   local total_delta_len = 0
-  for _, shake in ipairs(self.history.buffer) do
-    total_delta_len += #shake - average
+  for i = 1, #self.history do
+    total_delta_len += #self.history.buffer[i] - average
   end
   total_delta_len /= #self.history
 

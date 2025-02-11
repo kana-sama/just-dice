@@ -54,7 +54,7 @@ function Cursor:update()
   self.y:update()
 
   self.sprite:setRotation(self.angle)
-  self.sprite:moveTo(self.x:get(), self.y:get() + self.animation:currentValue())
+  self.sprite:moveTo(math.floor(self.x:get()), math.floor(self.y:get() + self.animation:currentValue()))
   self.sprite:setImageDrawMode(theme:is_dark_theme() and playdate.graphics.kDrawModeCopy or playdate.graphics.kDrawModeInverted)
 end
 

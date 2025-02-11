@@ -51,8 +51,6 @@ function Die:new(size)
   self.highlighting = Progress(HIGHLIGHT_ANIMATION_DURATION)
   self.highlighting:backward()
 
-  self.bounding_rect = self.die_sprite:getBoundsRect():clone()
-
   self:randomize()
 end
 
@@ -156,23 +154,32 @@ function Die:update()
     self.shadow_sprite:setImage(shadow_image:rotatedImage(self.angle))
     self:save_cache()
   end
-
-  local start_point = playdate.geometry.point.new(-self.size, -self.size)
-  local target_point = self.position
-  local finish_point = playdate.geometry.point.new(playdate.display.getWidth() + self.size, playdate.display.getHeight() + self.size)
-
-  local x, y = start_point
-    :lerp(target_point, self.roll_animation:currentValue() --[[@as number]])
-    :lerp(finish_point, self.remove_animation:currentValue() --[[@as number]])
-    :unpack()
-
-  self.die_sprite:moveTo(x, y)
-  self.bounding_rect = self.die_sprite:getBoundsRect():clone()
   
-  local highlighting_offset = self.highlighting:progress() * (HIGHLIGHT_HIGHT + self.floating_animation:currentValue())
+  local position = self.position
+  
+  if not self.roll_animation:ended() then
+    local start_point = playdate.geometry.point.new(-self.size, -self.size)
+    position = start_point:lerp(position, self.roll_animation:currentValue() --[[@as number]])
+  end
 
-  self.die_sprite:moveTo(x, y - highlighting_offset)
-  self.shadow_sprite:moveTo(x + highlighting_offset / 2, y + highlighting_offset)
+  if not self.remove_animation:ended() then
+    local finish_point = playdate.geometry.point.new(playdate.display.getWidth() + self.size, playdate.display.getHeight() + self.size)
+    position = position:lerp(finish_point, self.remove_animation:currentValue() --[[@as number]])
+  end
+  
+  local highlighting_offset = self.highlighting:progress() * HIGHLIGHT_HIGHT
+  local floating_offset = self.highlighting:progress() * self.floating_animation:currentValue()
+  local offset = highlighting_offset + floating_offset
+
+  self.die_sprite:moveTo(
+    math.floor(position.x),
+    math.floor(position.y - offset)
+  )
+
+  self.shadow_sprite:moveTo(
+    math.floor(position.x + offset / 2),
+    math.floor(position.y + offset)
+  )
 end
 
 function Die:start_removing()

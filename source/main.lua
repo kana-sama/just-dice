@@ -15,6 +15,7 @@ import "utils/image"
 import "utils/disabled_animator"
 import "utils/coroutine"
 import "utils/rect"
+import "utils/ui_sound"
 
 import "services/shaking"
 import "services/config"
@@ -81,11 +82,11 @@ end
 
 local game = Game()
 
-if playdate.isSimulator then
+-- if playdate.isSimulator then
   function sample(name, fn)
     fn()
   end
-end
+-- end
 
 function playdate.update()
 sample("update", function()

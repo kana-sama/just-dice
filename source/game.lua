@@ -1,4 +1,4 @@
-local INITIAL_DICE_COUNT <const> = 6
+local INITIAL_DICE_COUNT <const> = 9
 local MAX_DICE_COUNT <const> = 6
 
 local find_free_place_for_die, is_valid_positions
@@ -20,7 +20,10 @@ function Game:new()
   ---@type table<integer, boolean>
   self.selected = {}
   self.active_die = 1
-  self.prev_active_die = 1
+
+  ---@type { weak_ref: Die? }
+  self.prev_active_die = { weak_ref = nil }
+  setmetatable(self.prev_active_die, {__mode = "v"})
 
   ---@type Cursor?
   self.cursor = nil
@@ -166,6 +169,8 @@ end
 
 function Game:logic()
   if self.shaking.is_start_shaking then
+    self:stop_selection()
+    
     if self:is_something_selected() then
       self:move_selected_to_random_task_list()
     else
@@ -197,25 +202,14 @@ function Game:logic()
       self:roll_all_dice()
     end
 
-    self:stop_selection()
+    self:clear_selection()
   end
 
   if self.cursor then
-    if input.left or input.down then
-      self:move_cursor_left()
-    end
-
-    if input.right or input.up then
-      self:move_cursor_right()
-    end
-
-    if input.a then
-      self:toggle_active_die()
-    end
-
-    if input.b then
-      self:stop_selection()
-    end
+    if input.left or input.down then self:move_cursor_left() end
+    if input.right or input.up then self:move_cursor_right() end
+    if input.a then self:toggle_active_die() end
+    if input.b then self:cancel_selection() end
   else
     if input.left or input.down then
       if #self.dice > 1 then
@@ -282,7 +276,7 @@ end)
   end
 
   if self.cursor then
-    self.cursor:move_to(self.dice[self.active_die].bounding_rect)
+    self.cursor:move_to(self.dice[self.active_die].die_sprite:getBoundsRect())
     self.cursor:update()
   end
 
@@ -342,27 +336,48 @@ function Game:move_selected_to_random_task_list()
 end
 
 function Game:start_selection()
-  self.active_die = self.prev_active_die
+  UISound:start_selection()
+
+  self.active_die = 1
+
+  if self.prev_active_die.weak_ref then
+    for i, die in ipairs(self.dice) do
+      if die == self.prev_active_die.weak_ref then
+        self.active_die = i
+        break
+      end
+    end
+  end
 
   if self.active_die > #self.dice then
     self.active_die = 1
   end
 
-  self.cursor = Cursor(self.dice[self.active_die].bounding_rect)
+  self.cursor = Cursor(self.dice[self.active_die].die_sprite:getBoundsRect())
   self.selected = {}
 end
 
+function Game:cancel_selection()
+  UISound:cancel_selection()
+  self:clear_selection()
+  self:stop_selection()
+end
+
 function Game:stop_selection()
-  self.selected = {}
-  
   if self.cursor then
-    self.prev_active_die = self.active_die
+    self.prev_active_die.weak_ref = self.dice[self.active_die]
     self.cursor:remove()
     self.cursor = nil
   end
 end
 
+function Game:clear_selection()
+  self.selected = {}
+end
+
+
 function Game:move_cursor_left()
+  UISound:move_cursor()
   self.active_die -= 1
   if self.active_die < 1 then
     self.active_die = #self.dice
@@ -370,6 +385,7 @@ function Game:move_cursor_left()
 end
 
 function Game:move_cursor_right()
+  UISound:move_cursor()
   self.active_die += 1
   if self.active_die > #self.dice then
     self.active_die = 1
@@ -378,6 +394,12 @@ end
 
 function Game:toggle_active_die()
   self.selected[self.active_die] = not self.selected[self.active_die]
+
+  if self.selected[self.active_die] then
+    UISound:activate_die()
+  else
+    UISound:deactivate_die()
+  end
 end
 
 
