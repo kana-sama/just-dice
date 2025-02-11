@@ -40,6 +40,6 @@ end
 
 function Background:update()
   local theme = theme:is_dark_theme() and "dark" or "light"
-  local pattern = config.pattern and "with_pattern" or "without_pattern"
+  local pattern = config.stored.pattern and "with_pattern" or "without_pattern"
   self.sprite:setImage(self.prerenderd[theme][pattern])
 end

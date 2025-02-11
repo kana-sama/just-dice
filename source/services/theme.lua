@@ -21,7 +21,7 @@ light_theme = {
 
 ---@class theme
 theme = {
-  values = config.is_dark_theme and dark_theme or light_theme,
+  values = config.stored.is_dark_theme and dark_theme or light_theme,
   version = 0,
 }
 
