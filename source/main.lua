@@ -1,3 +1,16 @@
+INITIAL_DICE_COUNT = 3
+MAX_DICE_COUNT = 9
+DIE_SIZE = 55
+
+Z_INDICES = {
+  background = 0,
+  die_shadow = 1,
+  die = 2,
+  cursor = 3,
+  lock = 4,
+  fade = 5,
+}
+
 import "CoreLibs/math"
 import "CoreLibs/graphics"
 import "CoreLibs/object"
@@ -30,24 +43,6 @@ import "components/die"
 import "components/cursor"
 
 import "game"
-
-Z_INDICES = {
-  background = 0,
-  die_shadow = 1,
-  die = 2,
-  cursor = 3,
-  lock = 4,
-  fade = 5,
-}
-
-DIE_SIZES = {
-  [1] = 70,
-  [2] = 70,
-  [3] = 60,
-  [4] = 60,
-  [5] = 50,
-  [6] = 50,
-}
 
 playdate.display.setRefreshRate(50.0)
 
@@ -82,14 +77,10 @@ end
 
 local game = Game()
 
--- if playdate.isSimulator then
-  function sample(name, fn)
-    fn()
-  end
--- end
-
+---@diagnostic disable-next-line: duplicate-set-field
 function playdate.update()
-sample("update", function()
+  playdate.graphics.setBackgroundColor(theme:background_color())
+
   input:update()
   game:update()
 
@@ -98,5 +89,7 @@ sample("update", function()
   if config.stored.framerate then
     playdate.drawFPS(0, 0)
   end
-end)
 end
+
+-- import "generators/positions"
+-- import "generators/dice"

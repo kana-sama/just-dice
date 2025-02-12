@@ -45,7 +45,7 @@ function stat:render()
       local rolls = shorten(self.rolls[i])
       local perc = string.format("%.f%%", rolls / self:total() * 100)
   
-      Die.render(i, 20):draw(30, line_y)
+      Die.render(i, 20, 0):draw(30, line_y)
   
       playdate.graphics.pushContext()
       playdate.graphics.setImageDrawMode(theme:text_draw_mode())

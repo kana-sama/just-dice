@@ -10,11 +10,11 @@ UISound = {
   blop = new_synth(0, 0.1, 0, 0.2, 0.4, playdate.sound.kWavePOVosim),
 }
 
-function UISound:start_selection()
+function UISound:start_locking()
   UISound:move_cursor()
 end
 
-function UISound:cancel_selection()
+function UISound:cancel_locking()
   self.beep:playNote(100)
 end
 

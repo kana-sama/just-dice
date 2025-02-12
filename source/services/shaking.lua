@@ -5,19 +5,20 @@ local EXTREMUM_DEBOUNCE <const> = 5
 
 ---@class Shaking
 ---@field history RingBuffer<Vector3D>
----@field is_shaking boolean
----@field is_start_shaking boolean
----@field is_stop_shaking boolean
----@field is_extremum boolean
+---@field is_going_on boolean
+---@field is_just_started boolean
+---@field is_just_stopped boolean
+---@field is_on_extremum boolean
+---@overload fun(): Shaking
 Shaking = Object:extend()
 
 function Shaking:new()
   self.history = RingBuffer(MAX_HISTORY_SIZE, Vector3D.zero)
 
-  self.is_shaking = false
-  self.is_start_shaking = false
-  self.is_stop_shaking = false
-  self.is_extremum = false
+  self.is_going_on = false
+  self.is_just_started = false
+  self.is_just_stopped = false
+  self.is_on_extremum = false
 
   self.shake_debounce = 0
   self.extremum_debounce = 0
@@ -36,27 +37,27 @@ function Shaking:update()
 
   local is_shaking_right_now = total_delta_len > REQUIRED_SHAKE_FORCE
 
-  if is_shaking_right_now ~= self.is_shaking then
+  if is_shaking_right_now ~= self.is_going_on then
     self.shake_debounce += 1
   else
     self.shake_debounce = 0
   end
 
-  local is_shaking_prev = self.is_shaking
+  local is_shaking_prev = self.is_going_on
 
   if self.shake_debounce > SHAKE_DEBOUNCE then
-    self.is_shaking = is_shaking_right_now
+    self.is_going_on = is_shaking_right_now
     self.shake_debounce = 0
   end
 
-  self.is_start_shaking = not is_shaking_prev and self.is_shaking
-  self.is_stop_shaking = is_shaking_prev and not self.is_shaking
+  self.is_just_started = not is_shaking_prev and self.is_going_on
+  self.is_just_stopped = is_shaking_prev and not self.is_going_on
 
-  self.is_extremum = true
+  self.is_on_extremum = true
       and self.extremum_debounce <= 0
       and #(self.history:last() - self.history:prev()) > 0.5
 
-  if self.is_extremum then
+  if self.is_on_extremum then
     self.extremum_debounce = EXTREMUM_DEBOUNCE
   else
     self.extremum_debounce -= 1

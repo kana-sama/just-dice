@@ -4,6 +4,7 @@ Fade = Object:extend()
 
 function Fade:new()
   self.progress = Progress(10)
+  self.progress:backward()
 
   self.sprite = playdate.graphics.sprite.new()
   self.sprite:setCenter(0, 0)
@@ -41,11 +42,11 @@ function Fade:update()
 end
 
 ---@return boolean
-function Fade:is_faded_in()
+function Fade:completed()
   return self.progress.current_value == self.progress.duration
 end
 
 ---@return boolean
-function Fade:is_faded_out()
+function Fade:not_started()
   return self.progress.current_value == 0
 end

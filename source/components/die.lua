@@ -4,6 +4,10 @@ local roll_effect = playdate.sound.sample.new("assets/audio/roll")
 local shake_effect = playdate.sound.sample.new("assets/audio/shake")
     or error("Failed to load 'assets/audio/shake.wav'")
 
+local prerendered = playdate.graphics.imagetable.new("assets/images/dice")
+    or error("Failed to load 'assets/images/dice-table-*-*.gif'")
+
+
 local ROLL_ANIMATION_DURATION <const> = 500
 local REMOVE_ANIMATION_DURATION <const> = 300
 local HIGHLIGHT_ANIMATION_DURATION <const> = 15
@@ -27,9 +31,9 @@ Die.floating_animation.repeatCount = -1
 ---@param size number
 function Die:new(size)
   self.value = nil
-  self.angle = nil
   self.drawn_cache = nil
   
+  self.angle = 0
   self.size = size
   self.position = playdate.geometry.point.new(0, 0)
 
@@ -56,7 +60,6 @@ end
 
 function Die:randomize()
   self.value = math.random(6)
-  self.angle = math.random(360)
   stat:add_die(self.value)
 end
 
@@ -67,8 +70,11 @@ end
 
 function Die:play_roll_effect()
   local delay = 0.1 + math.random() * 0.2
+
+  self.roll_player:stop()
   self.roll_player:setOffset(0.2)
   self.roll_player:playAt(playdate.sound.getCurrentTime() + delay)
+  self.roll_player:play()
 end
 
 function Die:play_shake_effect()
@@ -80,9 +86,10 @@ function Die:play_shake_effect()
 end
 
 ---@param value die_value
----@param size number
+---@param size integer
+---@param angle integer
 ---@return pd_image die, pd_image shadow
-function Die.render(value, size)
+function Die.render(value, size, angle)
   local die = playdate.graphics.image.render(size, size, function()
     playdate.graphics.setColor(theme:foreground_color())
     playdate.graphics.fillRoundRect(0, 0, size, size, size / 5)
@@ -117,13 +124,28 @@ function Die.render(value, size)
       playdate.graphics.fillCircleAtPoint(size / 4, size / 2, radius)
       playdate.graphics.fillCircleAtPoint(size / 4 * 3, size / 2, radius)
     end
-  end)
+  end):rotatedImage(angle)
 
   local shadow = playdate.graphics.image.render(size, size, function()
     playdate.graphics.setColor(theme:foreground_color())
     playdate.graphics.setDitherPattern(0.5)
     playdate.graphics.fillRoundRect(0, 0, size, size, size / 5)
-  end)
+  end):rotatedImage(angle)
+
+  return die, shadow
+end
+
+---@param value die_value
+---@param angle integer
+---@return pd_image die, pd_image shadow
+function Die.prerendered(value, angle)
+  local x = angle // 3 + 1
+  
+  local die = prerendered:getImage(x, value)
+  local shadow = prerendered:getImage(x, 7)
+
+  die:setInverted(not theme:is_dark_theme())
+  shadow:setInverted(not theme:is_dark_theme())
 
   return die, shadow
 end
@@ -149,9 +171,9 @@ function Die:update()
   self.highlighting:update()
 
   if self:is_cache_invalidated() then
-    local die_image, shadow_image = Die.render(self.value, self.size)
-    self.die_sprite:setImage(die_image:rotatedImage(self.angle))
-    self.shadow_sprite:setImage(shadow_image:rotatedImage(self.angle))
+    local die_image, shadow_image = Die.prerendered(self.value, self.angle)
+    self.die_sprite:setImage(die_image)
+    self.shadow_sprite:setImage(shadow_image)
     self:save_cache()
   end
   
