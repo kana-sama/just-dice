@@ -76,7 +76,7 @@ function Die:play_shake_effect()
   local volume = 0.6 + math.random() * 0.4
   local rate   = 0.8 + math.random() * 0.4
 
-  -- shake_effect:playAt(playdate.sound.getCurrentTime() + offset, volume, nil, rate)
+  shake_effect:playAt(playdate.sound.getCurrentTime() + offset, volume, nil, rate)
 end
 
 ---@param value die_value
