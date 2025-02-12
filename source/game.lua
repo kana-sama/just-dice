@@ -161,12 +161,15 @@ function Game:remove_die()
     local die = table.remove_elem(self.dice, #self.dice)
     table.insert(self.removed_dice, die)
     die:start_removing()
+    self:play_roll_effect(1)
   else
     self:shake_screen()
   end
 end
 
 function Game:apply_positions()
+  local changed_count = 0
+
   for i, die in ipairs(self.dice) do
     local changed = false
 
@@ -186,8 +189,22 @@ function Game:apply_positions()
     end
 
     if changed then
+      changed_count += 1
       die:roll()
     end
+  end
+
+  self:play_roll_effect(changed_count)
+end
+
+---@param count integer
+function Game:play_roll_effect(count)
+  if count >= 5 then
+    Die.roll_effects.many:play()
+  elseif count >= 2 then
+    Die.roll_effects.some:play()
+  elseif count >= 1 then
+    Die.roll_effects.one:play()
   end
 end
 
@@ -204,7 +221,7 @@ function Game:shuffle()
   while old_positions == self.positions do
     self.positions = random_positions_table[math.random(#random_positions_table)]
   end
-  
+
   self:apply_positions()
 end
 
@@ -251,8 +268,6 @@ function Game:add_cursor()
 end
 
 function Game:remove_cursor()
-  UISound:cancel_locking()
-
   if self.cursor then
     self.cursor:remove()
     self.cursor = nil
@@ -260,6 +275,7 @@ function Game:remove_cursor()
 end
 
 function Game:unlock_all()
+  UISound:cancel_locking()
   self:remove_cursor()
   self.locked_dice = {}
 end

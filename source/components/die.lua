@@ -1,5 +1,11 @@
-local roll_effect = playdate.sound.sample.new("assets/audio/roll")
-    or error("Failed to load 'assets/audio/roll.wav'")
+roll_effects = {
+  one = playdate.sound.sample.new("assets/audio/roll-one")
+      or error("Failed to load 'assets/audio/roll-one.wav'");
+  some = playdate.sound.sample.new("assets/audio/roll-some")
+      or error("Failed to load 'assets/audio/roll-some.wav'");
+  many = playdate.sound.sample.new("assets/audio/roll-many")
+      or error("Failed to load 'assets/audio/roll-many.wav'");
+}
 
 local shake_effect = playdate.sound.sample.new("assets/audio/shake")
     or error("Failed to load 'assets/audio/shake.wav'")
@@ -23,6 +29,8 @@ local FLOATING_OFFSET <const> = 3
 ---@overload fun(size: number): Die
 Die = Object:extend()
 
+Die.roll_effects = roll_effects
+
 Die.floating_animation =  playdate.graphics.animator.new(700, -FLOATING_OFFSET/2, FLOATING_OFFSET/2, playdate.easingFunctions.inOutQuad)
 Die.floating_animation.reverses = true
 Die.floating_animation.repeatCount = -1
@@ -39,10 +47,6 @@ function Die:new(size)
 
   self.roll_animation = playdate.graphics.animator.new(ROLL_ANIMATION_DURATION, 0, 1, playdate.easingFunctions.outCirc)
   self.remove_animation = playdate.graphics.animator.disabled(0)
-
-  self.roll_player = playdate.sound.sampleplayer.new(roll_effect)
-  self.roll_player:setRate(0.8 + math.random() * 0.4)
-  self.roll_player:setVolume(0.6 + math.random() * 0.4)
 
   self.die_sprite = playdate.graphics.sprite.new()
   self.die_sprite:setZIndex(Z_INDICES.die)
@@ -65,16 +69,6 @@ end
 
 function Die:roll()
   self.roll_animation:reset()
-  self:play_roll_effect()
-end
-
-function Die:play_roll_effect()
-  local delay = 0.1 + math.random() * 0.2
-
-  self.roll_player:stop()
-  self.roll_player:setOffset(0.2)
-  self.roll_player:playAt(playdate.sound.getCurrentTime() + delay)
-  self.roll_player:play()
 end
 
 function Die:play_shake_effect()
@@ -82,7 +76,7 @@ function Die:play_shake_effect()
   local volume = 0.6 + math.random() * 0.4
   local rate   = 0.8 + math.random() * 0.4
 
-  shake_effect:playAt(playdate.sound.getCurrentTime() + offset, volume, nil, rate)
+  -- shake_effect:playAt(playdate.sound.getCurrentTime() + offset, volume, nil, rate)
 end
 
 ---@param value die_value
@@ -139,7 +133,7 @@ end
 ---@param angle integer
 ---@return pd_image die, pd_image shadow
 function Die.prerendered(value, angle)
-  local x = angle // 3 + 1
+  local x = angle % 180 // 3 + 1
   
   local die = prerendered:getImage(x, value)
   local shadow = prerendered:getImage(x, 7)
@@ -206,7 +200,6 @@ end
 
 function Die:start_removing()
   self.remove_animation = playdate.graphics.animator.new(REMOVE_ANIMATION_DURATION, 0, 1, playdate.easingFunctions.inOutCirc)
-  self:play_roll_effect()
 end
 
 ---@return boolean

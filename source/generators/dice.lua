@@ -6,10 +6,10 @@ for angle = 0, 359, 3 do
   image_height = math.max(image_height, h)
 end
 
-local set = playdate.graphics.image.new(image_width * 120, image_height * 7)
+local set = playdate.graphics.image.new(image_width * 60, image_height * 7)
 playdate.graphics.pushContext(set)
 
-for angle = 0, 359, 3 do
+for angle = 0, 177, 3 do
   ---@type pd_image, pd_image
   local die, shadow
 
