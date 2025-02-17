@@ -15,10 +15,12 @@ for angle = 0, 177, 3 do
 
   for value = 1, 6 do
     die, shadow = Die.render(value, DIE_SIZE, angle)
-    die:draw((angle // 3) * image_width, (value - 1) * image_height)
+    local w, h = die:getSize()
+    die:draw((angle // 3) * image_width + (image_width - w) / 2, (value - 1) * image_height + (image_height - h) / 2)
   end
 
-  shadow:draw((angle // 3) * image_width, 6 * image_height)
+  local w, h = shadow:getSize()
+  shadow:draw((angle // 3) * image_width + (image_width - w) / 2, 6 * image_height + (image_height - h) / 2)
 end
 
 playdate.graphics.popContext()
